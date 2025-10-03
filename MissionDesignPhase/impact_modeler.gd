@@ -1,4 +1,7 @@
 extends SceneBase
+class_name ImpactModeler
+
+
 @onready var three_d_container = %threeD_container
 
 #region reference 
@@ -162,7 +165,7 @@ var prefab_path = "res://Data Processing Server/NEO Library/NEO Prefabs/"
 var current_neo: Node3D
 var current_neo_footprint: NEOFootPrint
 var simulation_time: float = 0.0
-var time_scale: float = 10*86400.0  # Seconds per frame (1 day per frame default)
+var time_scale: float = 86400.0  # Seconds per frame (1 day per frame default)
 var orbit_scale: float = 5.0  # Godot units radius
 var max_distance_km: float = 0.0  # Will be set to aphelion distance
 
@@ -170,6 +173,7 @@ var max_distance_km: float = 0.0  # Will be set to aphelion distance
 var trajectory_mesh: MeshInstance3D
 var earth_sphere: MeshInstance3D
 const EARTH_DISTANCE_KM = 149597870.7  # 1 AU in km (Earth's distance from Sun)
+const EARTH_DIAMETER_KM = 12742.0  # Earth's diameter in km
 
 func load_neo():
 	var neo_scene: PackedScene = load(prefab_path + Globals.active_neo_designation + ".tscn")
@@ -291,10 +295,15 @@ func create_earth_sphere():
 	earth_sphere = MeshInstance3D.new()
 	add_child(earth_sphere)
 	
-	# Create sphere mesh
+	# Calculate Earth's mesh size using the same remapping as NEOs
+	# Clamp Earth's diameter to the max range since it's much larger than asteroids
+	var clamped_diameter = clamp(EARTH_DIAMETER_KM, 0.1, 35.0)
+	var earth_mesh_size = remap(clamped_diameter, 0.1, 35.0, 0.5, 1.5)
+	
+	# Create sphere mesh with calculated size
 	var sphere = SphereMesh.new()
-	sphere.radius = 0.1  # Small sphere to represent Earth
-	sphere.height = 0.2
+	sphere.radius = earth_mesh_size / 2.0  # radius is half of diameter
+	sphere.height = earth_mesh_size  # height is the full diameter
 	earth_sphere.mesh = sphere
 	
 	# Create blue material for Earth
@@ -312,3 +321,5 @@ func create_earth_sphere():
 	
 	print("Earth placed at: ", earth_scaled_pos, " (Godot units)")
 	print("Earth distance: ", EARTH_DISTANCE_KM, " km (1 AU)")
+	print("Earth diameter: ", EARTH_DIAMETER_KM, " km (clamped to ", clamped_diameter, " km for mesh)")
+	print("Earth mesh size: ", earth_mesh_size, " Godot units")

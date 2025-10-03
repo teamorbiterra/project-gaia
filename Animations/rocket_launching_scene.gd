@@ -1,7 +1,7 @@
 extends Node3D
 @onready var animation_player = $PhoneixLaunchVehicle/AnimationPlayer
 
-@onready var launch_button = $Control/launch_button
+@onready var launch_button = %launch_button
 @onready var gpu_particles_3d = $PhoneixLaunchVehicle/RocketBody/GPUParticles3D
 
 
@@ -22,4 +22,4 @@ func _ready():
 
 func _process(delta):
 	if launched:
-		rocket_body.global_position.y+=5.0*delta
+		rocket_body.global_position.y+=10.0*delta
