@@ -1,7 +1,10 @@
 extends Node
 
-var active_confined_menu: ConfinedMenu=null
 
+signal neo_selected(designation:String)
+
+var active_confined_menu: ConfinedMenu=null
+var active_neo_designation:String
 
 enum requests{
 REMOVE_AND_ADD,
