@@ -23,7 +23,7 @@ This document details the mathematical formulas, equations, and methodologies us
 
 ## Input Data Required
 
-### From NEO Database (NASA JPL)
+### From NEO Database- NeoWs API (Near-Earth Object Web Service)
 
 | Parameter | Symbol | Unit | Description |
 |-----------|--------|------|-------------|
