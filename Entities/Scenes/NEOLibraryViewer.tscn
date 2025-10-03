@@ -1,0 +1,108 @@
+[gd_scene load_steps=8 format=3 uid="uid://dxtimjpmspms"]
+
+[ext_resource type="Script" uid="uid://v1m38uht7uj0" path="res://Entities/Scripts/NeoLibrarryViewer.gd" id="1_rsevw"]
+[ext_resource type="Theme" uid="uid://b3klx57slj0l3" path="res://UIUX/soft_retro.tres" id="2_gf7s3"]
+[ext_resource type="Script" uid="uid://dobbjt5hiqqg4" path="res://addons/orbit-controls/orbit-controls.gd" id="3_dj0ds"]
+[ext_resource type="Texture2D" uid="uid://dui4qxbvw1ntd" path="res://HDRI Textures/HDR_blue_nebulae-1.hdr" id="4_f2wli"]
+
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_wkxf0"]
+panorama = ExtResource("4_f2wli")
+
+[sub_resource type="Sky" id="Sky_v1vc4"]
+sky_material = SubResource("PanoramaSkyMaterial_wkxf0")
+
+[sub_resource type="Environment" id="Environment_57kyj"]
+background_mode = 2
+sky = SubResource("Sky_v1vc4")
+
+[node name="OrbitControlExperiment" type="Node"]
+script = ExtResource("1_rsevw")
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -1363.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_gf7s3")
+
+[node name="label" type="RichTextLabel" parent="Control"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/normal_font_size = 30
+
+[node name="pick_this_button" type="Button" parent="Control"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -241.5
+offset_top = -155.0
+offset_right = -40.5
+offset_bottom = -94.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "Pick This!"
+
+[node name="prev_button" type="Button" parent="Control"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -241.5
+offset_top = -256.0
+offset_right = -40.5
+offset_bottom = -195.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "prev"
+
+[node name="next_buttnon" type="Button" parent="Control"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -5.5
+offset_top = -256.0
+offset_right = 195.5
+offset_bottom = -195.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "next"
+
+[node name="Container" type="Node3D" parent="."]
+unique_name_in_owner = true
+
+[node name="Camera3D" type="Camera3D" parent="Container"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6197884, 15.230764)
+
+[node name="OrbitControls" type="Node3D" parent="Container"]
+script = ExtResource("3_dj0ds")
+_camera = NodePath("../Camera3D")
+metadata/_custom_type_script = "uid://dobbjt5hiqqg4"
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Container"]
+transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, 0, 0, 0)
+shadow_enabled = true
+
+[node name="PrefabContainer" type="Node3D" parent="Container"]
+unique_name_in_owner = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Container"]
+environment = SubResource("Environment_57kyj")

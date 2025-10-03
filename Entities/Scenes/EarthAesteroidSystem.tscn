@@ -1,0 +1,152 @@
+[gd_scene load_steps=26 format=3 uid="uid://dbaiiuej2c5g4"]
+
+[ext_resource type="Script" uid="uid://dqrfkb0tfa47q" path="res://Entities/Scripts/EarthAesteroidSystem.gd" id="1_0uxbt"]
+[ext_resource type="Shader" uid="uid://dknnycxd527h4" path="res://Shaders/NEOShader1.gdshader" id="2_2ccfw"]
+[ext_resource type="Shader" uid="uid://dsj8k7itp63fd" path="res://addons/GPUTrail-main/shaders/trail.gdshader" id="3_8inyj"]
+[ext_resource type="Shader" uid="uid://c4bq6b23fig38" path="res://addons/GPUTrail-main/shaders/trail_draw_pass.gdshader" id="4_n5wvm"]
+[ext_resource type="Texture2D" uid="uid://crk6pkb7e5rwc" path="res://addons/GPUTrail-main/defaults/texture.tres" id="5_1icq3"]
+[ext_resource type="Script" uid="uid://djc63at1udl8l" path="res://addons/GPUTrail-main/GPUTrail3D.gd" id="6_0dcyw"]
+[ext_resource type="Texture2D" uid="uid://c01uw4hate8v6" path="res://HDRI Textures/world.topo.bathy.200404.3x5400x2700.jpg" id="7_0ok2u"]
+[ext_resource type="Texture2D" uid="uid://dui4qxbvw1ntd" path="res://HDRI Textures/HDR_blue_nebulae-1.hdr" id="8_g4f8t"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_hy7n7"]
+noise_type = 3
+frequency = 0.0337
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_wdje2"]
+noise = SubResource("FastNoiseLite_hy7n7")
+seamless = true
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_hu43a"]
+noise = SubResource("FastNoiseLite_hy7n7")
+seamless = true
+as_normal_map = true
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_wdje2"]
+render_priority = 0
+shader = ExtResource("2_2ccfw")
+shader_parameter/noise = SubResource("NoiseTexture2D_wdje2")
+shader_parameter/normal_map = SubResource("NoiseTexture2D_hu43a")
+shader_parameter/sphere_radius = 0.11800000234512
+shader_parameter/amplitude = 0.0470000022325
+shader_parameter/uv_scale = Vector2(1, 1)
+shader_parameter/mix_color = Color(0, 0, 0, 1)
+shader_parameter/mix_ratio = 0.5
+shader_parameter/axis_scale = Vector3(1, 1, 1)
+shader_parameter/roughtness_value = 1.0
+shader_parameter/world_center = Vector3(0, 0, 0)
+shader_parameter/seam_fix_method = 1
+
+[sub_resource type="BoxMesh" id="BoxMesh_2ao8a"]
+material = SubResource("ShaderMaterial_wdje2")
+size = Vector3(0.1, 0.1, 0.1)
+subdivide_width = 32
+subdivide_height = 32
+subdivide_depth = 32
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_s8htv"]
+shader = ExtResource("3_8inyj")
+
+[sub_resource type="Gradient" id="Gradient_w05gl"]
+colors = PackedColorArray(0.7054969, 0.4874555, 0.0122635225, 1, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_hfsn6"]
+gradient = SubResource("Gradient_w05gl")
+use_hdr = true
+
+[sub_resource type="Curve" id="Curve_ktgk7"]
+bake_resolution = 16
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0.1), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_2g40m"]
+curve = SubResource("Curve_ktgk7")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_4g8uk"]
+resource_local_to_scene = true
+render_priority = 0
+shader = ExtResource("4_n5wvm")
+shader_parameter/tex = ExtResource("5_1icq3")
+shader_parameter/uv_offset = Vector2(0, 0)
+shader_parameter/color_ramp = SubResource("GradientTexture1D_hfsn6")
+shader_parameter/curve = SubResource("CurveTexture_2g40m")
+shader_parameter/emmission_transform = Projection(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
+shader_parameter/flags = 44
+
+[sub_resource type="QuadMesh" id="QuadMesh_3yin3"]
+material = SubResource("ShaderMaterial_4g8uk")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xrn62"]
+shading_mode = 2
+vertex_color_use_as_albedo = true
+albedo_texture = ExtResource("7_0ok2u")
+emission_enabled = true
+emission_energy_multiplier = 3.24
+emission_texture = ExtResource("7_0ok2u")
+rim_texture = ExtResource("7_0ok2u")
+subsurf_scatter_skin_mode = true
+stencil_flags = 2
+stencil_color = Color(0.9098039, 0.9098039, 0.05882353, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_2ao8a"]
+material = SubResource("StandardMaterial3D_xrn62")
+
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_2ao8a"]
+panorama = ExtResource("8_g4f8t")
+
+[sub_resource type="Sky" id="Sky_hy7n7"]
+sky_material = SubResource("PanoramaSkyMaterial_2ao8a")
+
+[sub_resource type="Environment" id="Environment_wdje2"]
+background_mode = 2
+sky = SubResource("Sky_hy7n7")
+glow_enabled = true
+
+[node name="EarthAesteroidSystem" type="Node"]
+
+[node name="earth_aes-system" type="Node3D" parent="."]
+script = ExtResource("1_0uxbt")
+
+[node name="commet" type="MeshInstance3D" parent="earth_aes-system"]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.6103125, 0, -0.926797)
+mesh = SubResource("BoxMesh_2ao8a")
+
+[node name="GPUTrail3D" type="GPUParticles3D" parent="earth_aes-system/commet"]
+transform = Transform3D(0.11, 0, 0, 0, 0.11, 0, 0, 0, 0.11, 0, 0, 0)
+amount = 100
+lifetime = 100.0
+preprocess = 1.14
+explosiveness = 1.0
+fixed_fps = 144
+process_material = SubResource("ShaderMaterial_s8htv")
+draw_pass_1 = SubResource("QuadMesh_3yin3")
+script = ExtResource("6_0dcyw")
+length_seconds = 0.6944444444444444
+color_ramp = SubResource("GradientTexture1D_hfsn6")
+curve = SubResource("CurveTexture_2g40m")
+billboard = true
+_defaults_have_been_set = true
+metadata/_custom_type_script = "uid://djc63at1udl8l"
+
+[node name="earth" type="MeshInstance3D" parent="earth_aes-system"]
+unique_name_in_owner = true
+mesh = SubResource("SphereMesh_2ao8a")
+skeleton = NodePath("../..")
+
+[node name="Camera3D" type="Camera3D" parent="earth_aes-system"]
+unique_name_in_owner = true
+fov = 25.1
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="earth_aes-system"]
+environment = SubResource("Environment_wdje2")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="earth_aes-system"]
+transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, 0, 0, 0)
+shadow_enabled = true
+
+[node name="Marker3D" type="Marker3D" parent="earth_aes-system"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.7689084, 0.66678965, -0.424994)
+
+[node name="Marker3D2" type="Marker3D" parent="earth_aes-system"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1860201, -0.6779468, -0.8786929)

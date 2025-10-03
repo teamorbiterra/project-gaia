@@ -1,0 +1,46 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Shader" path="res://Shaders/NEOShader1.gdshader" id="1_uv5gn"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_5yri3"]
+noise_type = 2
+frequency = 0.0027533874
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_34cuv"]
+noise = SubResource("FastNoiseLite_5yri3")
+seamless = true
+seamless_blend_skirt = 1.0
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_m667v"]
+noise = SubResource("FastNoiseLite_5yri3")
+seamless = true
+as_normal_map = true
+seamless_blend_skirt = 1.0
+bump_strength = 32.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_c2xoy"]
+render_priority = 0
+shader = ExtResource("1_uv5gn")
+shader_parameter/noise = SubResource("NoiseTexture2D_34cuv")
+shader_parameter/normal_map = SubResource("NoiseTexture2D_m667v")
+shader_parameter/sphere_radius = 0.801025216808023
+shader_parameter/amplitude = 0.3
+shader_parameter/uv_scale = Vector2(1, 1)
+shader_parameter/mix_color = Color(0.4117647, 0.4117647, 0.4117647, 1)
+shader_parameter/mix_ratio = 0.7
+shader_parameter/axis_scale = Vector3(1, 1.4693657, 1)
+shader_parameter/roughtness_value = 1.0
+shader_parameter/world_center = Vector3(0, 0, 0)
+shader_parameter/seam_fix_method = 1
+
+[sub_resource type="BoxMesh" id="BoxMesh_c58ck"]
+material = SubResource("ShaderMaterial_c2xoy")
+subdivide_width = 100
+subdivide_height = 100
+subdivide_depth = 100
+
+[node name="3552 Don Quixote (1983 SA)" type="Node3D"]
+
+[node name="3552 Don Quixote (1983 SA)_Mesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.6531676, -0.64425826, 0.3978737, 0.7364223, 0.6627583, -0.135771, -0.1762225, 0.38168427, 0.9073383, 0, 0, 0)
+mesh = SubResource("BoxMesh_c58ck")

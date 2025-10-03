@@ -1,0 +1,73 @@
+[gd_scene load_steps=2 format=3 uid="uid://bfwa0pbl7k6c4"]
+
+[ext_resource type="Theme" uid="uid://b3klx57slj0l3" path="res://UIUX/soft_retro.tres" id="1_o73ur"]
+
+[node name="SettingManager" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_o73ur")
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -129.0
+offset_top = 41.0
+offset_right = 129.0
+offset_bottom = 98.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 130
+text = "Settings"
+
+[node name="Label2" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -208.0
+offset_top = -288.0
+offset_right = -7.0
+offset_bottom = -231.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Font Size:"
+
+[node name="font_size" type="SpinBox" parent="Label2"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 217.0
+offset_right = 403.0
+offset_bottom = 57.0
+min_value = 15.0
+value = 15.0
+
+[node name="save_change" type="Button" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -336.0
+offset_top = -160.0
+offset_right = -60.0
+offset_bottom = -99.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "Save Change"

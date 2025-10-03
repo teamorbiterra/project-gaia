@@ -1,0 +1,19 @@
+[gd_scene load_steps=3 format=3 uid="uid://dv8wja3121u5e"]
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_auupi"]
+emission_shape = 1
+emission_sphere_radius = 4.85
+radial_velocity_min = -2.2351742e-05
+radial_velocity_max = 14.549977
+gravity = Vector3(0, 0, 0)
+radial_accel_min = -2.2351742e-06
+radial_accel_max = 6.549998
+
+[sub_resource type="SphereMesh" id="SphereMesh_0otnl"]
+
+[node name="ExplosionParticle" type="GPUParticles3D"]
+amount = 93
+lifetime = 30.0
+explosiveness = 1.0
+process_material = SubResource("ParticleProcessMaterial_auupi")
+draw_pass_1 = SubResource("SphereMesh_0otnl")

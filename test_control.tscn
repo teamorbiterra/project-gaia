@@ -1,0 +1,12 @@
+[gd_scene load_steps=2 format=3 uid="uid://cbfudsven88lv"]
+
+[ext_resource type="Script" uid="uid://toqmfcrvp7dw" path="res://Shaders/NEOMaterialController.gd" id="1_x52i7"]
+
+[node name="TestControl" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_x52i7")

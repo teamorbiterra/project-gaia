@@ -1,0 +1,46 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Shader" path="res://Shaders/NEOShader1.gdshader" id="1_10v0x"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_ki2jv"]
+noise_type = 2
+frequency = 0.0032554406
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_deluj"]
+noise = SubResource("FastNoiseLite_ki2jv")
+seamless = true
+seamless_blend_skirt = 1.0
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_41cgc"]
+noise = SubResource("FastNoiseLite_ki2jv")
+seamless = true
+as_normal_map = true
+seamless_blend_skirt = 1.0
+bump_strength = 32.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_2bxf2"]
+render_priority = 0
+shader = ExtResource("1_10v0x")
+shader_parameter/noise = SubResource("NoiseTexture2D_deluj")
+shader_parameter/normal_map = SubResource("NoiseTexture2D_41cgc")
+shader_parameter/sphere_radius = 0.8904285517922637
+shader_parameter/amplitude = 0.3
+shader_parameter/uv_scale = Vector2(1, 1)
+shader_parameter/mix_color = Color(0.4117647, 0.4117647, 0.4117647, 1)
+shader_parameter/mix_ratio = 0.7
+shader_parameter/axis_scale = Vector3(1, 1, 1.3176364)
+shader_parameter/roughtness_value = 1.0
+shader_parameter/world_center = Vector3(0, 0, 0)
+shader_parameter/seam_fix_method = 1
+
+[sub_resource type="BoxMesh" id="BoxMesh_uwkfe"]
+material = SubResource("ShaderMaterial_2bxf2")
+subdivide_width = 100
+subdivide_height = 100
+subdivide_depth = 100
+
+[node name="1866 Sisyphus (1972 XA)" type="Node3D"]
+
+[node name="1866 Sisyphus (1972 XA)_Mesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.41766554, -0.2635836, 0.86952823, -0.1800555, 0.91400707, 0.36355373, -0.89058167, -0.30840716, 0.33428952, 0, 0, 0)
+mesh = SubResource("BoxMesh_uwkfe")

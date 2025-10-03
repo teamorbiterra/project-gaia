@@ -1,0 +1,96 @@
+[gd_scene load_steps=3 format=3 uid="uid://c3omu7h7tmn23"]
+
+[ext_resource type="Script" uid="uid://x17otsbyvole" path="res://Entities/Scripts/main.gd" id="1_0ctjp"]
+[ext_resource type="Theme" uid="uid://b3klx57slj0l3" path="res://UIUX/soft_retro.tres" id="2_4uau1"]
+
+[node name="Main" type="Node"]
+script = ExtResource("1_0ctjp")
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 1920.0
+offset_bottom = 1080.0
+theme = ExtResource("2_4uau1")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -647.0
+offset_top = -450.0
+offset_right = -115.0
+offset_bottom = -158.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_constants/separation = 10
+
+[node name="NewGameButton" type="Button" parent="Control/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "New Game"
+
+[node name="ContinueButton" type="Button" parent="Control/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Continue"
+
+[node name="SettingsButton" type="Button" parent="Control/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Settings"
+
+[node name="QuitButton" type="Button" parent="Control/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Quit"
+
+[node name="Headline" type="Label" parent="Control"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -133.0
+offset_top = -229.0
+offset_right = 133.0
+offset_bottom = -172.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.12156863, 0.31764707, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 25
+theme_override_font_sizes/font_size = 155
+text = "Project GAIA"
+
+[node name="Tagline" type="Label" parent="Control/Headline"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -0.5
+offset_top = -57.0
+offset_right = 389.5
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.12156863, 0.31764707, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 30
+text = "Extinction Averted"
+
+[node name="CreditButton" type="Button" parent="Control"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 64.0
+offset_top = 919.0
+offset_right = 220.0
+offset_bottom = 980.0
+text = "Credits"

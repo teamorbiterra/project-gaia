@@ -1,0 +1,46 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Shader" path="res://Shaders/NEOShader1.gdshader" id="1_5pr68"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_sv8xl"]
+noise_type = 2
+frequency = 0.0050625145
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_n6vjn"]
+noise = SubResource("FastNoiseLite_sv8xl")
+seamless = true
+seamless_blend_skirt = 1.0
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_d10kk"]
+noise = SubResource("FastNoiseLite_sv8xl")
+seamless = true
+as_normal_map = true
+seamless_blend_skirt = 1.0
+bump_strength = 32.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_xdk73"]
+render_priority = 0
+shader = ExtResource("1_5pr68")
+shader_parameter/noise = SubResource("NoiseTexture2D_n6vjn")
+shader_parameter/normal_map = SubResource("NoiseTexture2D_d10kk")
+shader_parameter/sphere_radius = 0.5816075288424069
+shader_parameter/amplitude = 0.3
+shader_parameter/uv_scale = Vector2(1, 1)
+shader_parameter/mix_color = Color(0.4117647, 0.4117647, 0.4117647, 1)
+shader_parameter/mix_ratio = 0.7
+shader_parameter/axis_scale = Vector3(1, 1, 1.4286444)
+shader_parameter/roughtness_value = 1.0
+shader_parameter/world_center = Vector3(0, 0, 0)
+shader_parameter/seam_fix_method = 1
+
+[sub_resource type="BoxMesh" id="BoxMesh_5igq1"]
+material = SubResource("ShaderMaterial_xdk73")
+subdivide_width = 100
+subdivide_height = 100
+subdivide_depth = 100
+
+[node name="4503 Cleobulus (1989 WM)" type="Node3D"]
+
+[node name="4503 Cleobulus (1989 WM)_Mesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.9895789, 0.1437475, -0.008378033, -0.14395513, 0.98895985, -0.035146102, 0.0032333627, 0.035985902, 0.9993471, 0, 0, 0)
+mesh = SubResource("BoxMesh_5igq1")

@@ -1,0 +1,46 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Shader" path="res://Shaders/NEOShader1.gdshader" id="1_ewspk"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_qib44"]
+noise_type = 2
+frequency = 0.0026446101
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_nuudf"]
+noise = SubResource("FastNoiseLite_qib44")
+seamless = true
+seamless_blend_skirt = 1.0
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_8kjiu"]
+noise = SubResource("FastNoiseLite_qib44")
+seamless = true
+as_normal_map = true
+seamless_blend_skirt = 1.0
+bump_strength = 32.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_a3wib"]
+render_priority = 0
+shader = ExtResource("1_ewspk")
+shader_parameter/noise = SubResource("NoiseTexture2D_nuudf")
+shader_parameter/normal_map = SubResource("NoiseTexture2D_8kjiu")
+shader_parameter/sphere_radius = 0.5748876767851003
+shader_parameter/amplitude = 0.3
+shader_parameter/uv_scale = Vector2(1, 1)
+shader_parameter/mix_color = Color(0.4117647, 0.4117647, 0.4117647, 1)
+shader_parameter/mix_ratio = 0.7
+shader_parameter/axis_scale = Vector3(1, 1, 1.2613178)
+shader_parameter/roughtness_value = 1.0
+shader_parameter/world_center = Vector3(0, 0, 0)
+shader_parameter/seam_fix_method = 1
+
+[sub_resource type="BoxMesh" id="BoxMesh_g3o4y"]
+material = SubResource("ShaderMaterial_a3wib")
+subdivide_width = 100
+subdivide_height = 100
+subdivide_depth = 100
+
+[node name="2102 Tantalus (1975 YA)" type="Node3D"]
+
+[node name="2102 Tantalus (1975 YA)_Mesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.9939146, 0.10840144, 0.01956653, -0.10866558, 0.9939936, 0.012979685, -0.018041985, -0.015026913, 0.9997243, 0, 0, 0)
+mesh = SubResource("BoxMesh_g3o4y")

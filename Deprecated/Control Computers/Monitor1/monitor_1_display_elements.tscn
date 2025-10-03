@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://ve1d6d4pkuua"]
+
+[ext_resource type="Script" uid="uid://tm78kpm103oi" path="res://Deprecated/Control Computers/Monitor1/monitor_1_display_elements.gd" id="1_2me7o"]
+
+[node name="Monitor1_DisplayElements" type="Node2D"]
+script = ExtResource("1_2me7o")

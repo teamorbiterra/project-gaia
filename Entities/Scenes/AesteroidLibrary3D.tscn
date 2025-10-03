@@ -1,0 +1,74 @@
+[gd_scene load_steps=6 format=3 uid="uid://c6cy03n5cd3wa"]
+
+[ext_resource type="Script" uid="uid://dobbjt5hiqqg4" path="res://addons/orbit-controls/orbit-controls.gd" id="2_q5wng"]
+
+[sub_resource type="GDScript" id="GDScript_gvlnr"]
+script/source = "extends Node3D
+
+const DESIGNATIONS = preload(\"res://Data Processing Server/Externals/designations.json\")
+var file_name_buffer:Array=[]
+
+
+
+
+func _ready():
+	if DESIGNATIONS is JSON and DESIGNATIONS.data is Array:
+		file_name_buffer= DESIGNATIONS.data
+		print(file_name_buffer)
+	var mesh_inst= MeshInstance3D.new()
+	var mesh= BoxMesh.new()
+	var mater= StandardMaterial3D.new()
+	mater.albedo_color= Color.GHOST_WHITE
+	mesh.material= mater
+	mesh_inst.mesh= mesh
+	add_child(mesh_inst)
+
+var current_file=0
+
+func _input(event):
+	if event is InputEventKey and event.is_pressed():
+		match event.keycode:
+			KEY_RIGHT:
+				if file_name_buffer.is_empty(): return
+				current_file = min(file_name_buffer.size() - 1, current_file + 1)
+				load_current_prefab()
+			KEY_LEFT:
+				if file_name_buffer.is_empty(): return
+				current_file = max(0, current_file - 1)
+				load_current_prefab()
+		
+
+func load_current_prefab():
+	pass
+"
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_q5wng"]
+sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+ground_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+
+[sub_resource type="Sky" id="Sky_nrjpq"]
+sky_material = SubResource("ProceduralSkyMaterial_q5wng")
+
+[sub_resource type="Environment" id="Environment_hemm6"]
+background_mode = 2
+sky = SubResource("Sky_nrjpq")
+tonemap_mode = 2
+glow_enabled = true
+
+[node name="AesteroidLibrary3d" type="Node3D"]
+script = SubResource("GDScript_gvlnr")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, 0, 0, 0)
+shadow_enabled = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_hemm6")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 4.0500584)
+
+[node name="OrbitControls" type="Node3D" parent="."]
+script = ExtResource("2_q5wng")
+_camera = NodePath("../Camera3D")
+metadata/_custom_type_script = "uid://dobbjt5hiqqg4"

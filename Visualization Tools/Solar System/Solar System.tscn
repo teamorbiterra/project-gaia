@@ -1,0 +1,37 @@
+[gd_scene load_steps=8 format=3 uid="uid://bkberyrta06ug"]
+
+[ext_resource type="Script" uid="uid://cpuwwbmqb316w" path="res://Visualization Tools/Solar System/solar_system.gd" id="1_kbmno"]
+[ext_resource type="Script" uid="uid://3ibfqy7dbhgs" path="res://Visualization Tools/Solar System/data_container.gd" id="2_66ia8"]
+[ext_resource type="Texture2D" uid="uid://dui4qxbvw1ntd" path="res://HDRI Textures/HDR_blue_nebulae-1.hdr" id="3_rfwj5"]
+[ext_resource type="Script" uid="uid://dobbjt5hiqqg4" path="res://addons/orbit-controls/orbit-controls.gd" id="4_xq46r"]
+
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_xq46r"]
+panorama = ExtResource("3_rfwj5")
+
+[sub_resource type="Sky" id="Sky_wl64f"]
+sky_material = SubResource("PanoramaSkyMaterial_xq46r")
+
+[sub_resource type="Environment" id="Environment_nkr8p"]
+background_mode = 2
+sky = SubResource("Sky_wl64f")
+glow_enabled = true
+
+[node name="SolarSystem" type="Node3D"]
+script = ExtResource("1_kbmno")
+
+[node name="DataContainer" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("2_66ia8")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_nkr8p")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.96617836, 0.25787485, 0, -0.25787485, 0.96617836, 0, 1.3960534, 8.4557295)
+
+[node name="OrbitControls" type="Node3D" parent="."]
+script = ExtResource("4_xq46r")
+_camera = NodePath("../Camera3D")
+auto_rotate = true
+auto_rotate_speed = 0.134
+metadata/_custom_type_script = "uid://dobbjt5hiqqg4"

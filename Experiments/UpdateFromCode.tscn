@@ -1,0 +1,46 @@
+[gd_scene load_steps=10 format=3 uid="uid://dpicavwk30kmo"]
+
+[ext_resource type="Script" uid="uid://oqv8u4mktfrh" path="res://Experiments/update_from_code.gd" id="1_ufruq"]
+[ext_resource type="Texture2D" uid="uid://c01uw4hate8v6" path="res://HDRI Textures/world.topo.bathy.200404.3x5400x2700.jpg" id="2_24ie5"]
+[ext_resource type="Texture2D" uid="uid://dui4qxbvw1ntd" path="res://HDRI Textures/HDR_blue_nebulae-1.hdr" id="2_gnnqv"]
+[ext_resource type="Script" uid="uid://dobbjt5hiqqg4" path="res://addons/orbit-controls/orbit-controls.gd" id="4_p840l"]
+
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_p840l"]
+panorama = ExtResource("2_gnnqv")
+
+[sub_resource type="Sky" id="Sky_bqmyu"]
+sky_material = SubResource("PanoramaSkyMaterial_p840l")
+
+[sub_resource type="Environment" id="Environment_txsln"]
+background_mode = 2
+sky = SubResource("Sky_bqmyu")
+tonemap_mode = 2
+glow_enabled = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gnnqv"]
+albedo_texture = ExtResource("2_24ie5")
+
+[sub_resource type="SphereMesh" id="SphereMesh_p840l"]
+material = SubResource("StandardMaterial3D_gnnqv")
+
+[node name="UpdateFromCode" type="Node3D"]
+script = ExtResource("1_ufruq")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_txsln")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, 0, 0, 0)
+shadow_enabled = true
+
+[node name="earth" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.5174127, 0, 0)
+mesh = SubResource("SphereMesh_p840l")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.9306668, 0.36586785, 0, -0.36586785, 0.9306668, 0, 1.0944068, 3.1591)
+
+[node name="OrbitControls" type="Node3D" parent="."]
+script = ExtResource("4_p840l")
+_camera = NodePath("../Camera3D")
+metadata/_custom_type_script = "uid://dobbjt5hiqqg4"

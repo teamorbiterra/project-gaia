@@ -1,0 +1,46 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Shader" path="res://Shaders/NEOShader1.gdshader" id="1_babny"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_twkty"]
+noise_type = 2
+frequency = 0.003974358
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_mu5fi"]
+noise = SubResource("FastNoiseLite_twkty")
+seamless = true
+seamless_blend_skirt = 1.0
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_7vpx0"]
+noise = SubResource("FastNoiseLite_twkty")
+seamless = true
+as_normal_map = true
+seamless_blend_skirt = 1.0
+bump_strength = 32.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_nntgi"]
+render_priority = 0
+shader = ExtResource("1_babny")
+shader_parameter/noise = SubResource("NoiseTexture2D_mu5fi")
+shader_parameter/normal_map = SubResource("NoiseTexture2D_7vpx0")
+shader_parameter/sphere_radius = 2.294834552408309
+shader_parameter/amplitude = 0.3
+shader_parameter/uv_scale = Vector2(1, 1)
+shader_parameter/mix_color = Color(0.4117647, 0.4117647, 0.4117647, 1)
+shader_parameter/mix_ratio = 0.7
+shader_parameter/axis_scale = Vector3(1, 1, 1.3399705)
+shader_parameter/roughtness_value = 1.0
+shader_parameter/world_center = Vector3(0, 0, 0)
+shader_parameter/seam_fix_method = 1
+
+[sub_resource type="BoxMesh" id="BoxMesh_5m4hd"]
+material = SubResource("ShaderMaterial_nntgi")
+subdivide_width = 100
+subdivide_height = 100
+subdivide_depth = 100
+
+[node name="1036 Ganymed (A924 UB)" type="Node3D"]
+
+[node name="1036 Ganymed (A924 UB)_Mesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(-0.22315511, -0.6878413, 0.690707, 0.73080885, -0.5869624, -0.34841573, 0.64507383, 0.42702407, 0.63366425, 0, 0, 0)
+mesh = SubResource("BoxMesh_5m4hd")

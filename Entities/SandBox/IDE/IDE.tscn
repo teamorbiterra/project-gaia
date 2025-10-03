@@ -1,0 +1,107 @@
+[gd_scene load_steps=8 format=3 uid="uid://bsflou8cf5wyq"]
+
+[ext_resource type="Script" uid="uid://1ewxxprp73h7" path="res://Entities/SandBox/IDE/IDE.gd" id="1_gyaxl"]
+[ext_resource type="Theme" uid="uid://b3klx57slj0l3" path="res://UIUX/soft_retro.tres" id="1_o6v60"]
+[ext_resource type="Script" uid="uid://cs1e02nhdrjy6" path="res://Entities/SandBox/IDE/EDITOR.gd" id="3_6w7xn"]
+[ext_resource type="PackedScene" uid="uid://ca3ig1qq8pfd" path="res://Entities/SandBox/IDE/ConfinedMenu.tscn" id="4_8u0fr"]
+[ext_resource type="Script" uid="uid://b5n22scniowoo" path="res://Entities/SandBox/IDE/settings_manager.gd" id="4_t1cww"]
+[ext_resource type="Script" uid="uid://c8i0kal8ahyd8" path="res://Entities/SandBox/IDE/script_manager.gd" id="5_x13pp"]
+[ext_resource type="Script" uid="uid://del0ymkqbi5dw" path="res://Entities/SandBox/IDE/program_manager.gd" id="7_3pqbo"]
+
+[node name="Ide" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_o6v60")
+script = ExtResource("1_gyaxl")
+
+[node name="HSplitContainer" type="HSplitContainer" parent="."]
+layout_mode = 0
+offset_top = 66.0
+offset_right = 1920.0
+offset_bottom = 1080.0
+split_offset = 1255
+
+[node name="VSplitContainer" type="VSplitContainer" parent="HSplitContainer"]
+layout_mode = 2
+split_offset = 750
+
+[node name="EDITOR" type="CodeEdit" parent="HSplitContainer/VSplitContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+gutters_draw_line_numbers = true
+code_completion_enabled = true
+script = ExtResource("3_6w7xn")
+
+[node name="TERMINAL" type="TextEdit" parent="HSplitContainer/VSplitContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Console"
+editable = false
+context_menu_enabled = false
+emoji_menu_enabled = false
+shortcut_keys_enabled = false
+selecting_enabled = false
+deselect_on_focus_loss_enabled = false
+drag_and_drop_selection_enabled = false
+virtual_keyboard_enabled = false
+virtual_keyboard_show_on_focus = false
+middle_mouse_paste_enabled = false
+empty_selection_clipboard_enabled = false
+scroll_smooth = true
+
+[node name="Panel" type="Panel" parent="HSplitContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Documentation" type="RichTextLabel" parent="HSplitContainer/Panel"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/normal_font_size = 30
+autowrap_mode = 2
+
+[node name="menu_container" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 63.0
+grow_horizontal = 2
+theme_override_constants/separation = 14
+
+[node name="menu" parent="menu_container" instance=ExtResource("4_8u0fr")]
+unique_name_in_owner = true
+layout_mode = 2
+text = "MENU"
+items = PackedStringArray("Save Script", "Load Script", "Preference")
+
+[node name="task" parent="menu_container" instance=ExtResource("4_8u0fr")]
+unique_name_in_owner = true
+layout_mode = 2
+text = "TASK"
+items = PackedStringArray("Upload Program", "Run Program", "Load Template", "Clear Terminal")
+
+[node name="help" parent="menu_container" instance=ExtResource("4_8u0fr")]
+unique_name_in_owner = true
+layout_mode = 2
+text = "HELP"
+items = PackedStringArray("Mission Controller Program", "Launch Vehicle")
+
+[node name="SettingsManager" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("4_t1cww")
+
+[node name="ScriptManager" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("5_x13pp")
+
+[node name="ProgramManager" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("7_3pqbo")

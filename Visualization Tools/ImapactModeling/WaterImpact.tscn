@@ -1,0 +1,37 @@
+[gd_scene load_steps=7 format=3 uid="uid://btr5hqv1saqvr"]
+
+[ext_resource type="Script" uid="uid://b024pv6tqx0aq" path="res://Visualization Tools/ImapactModeling/water_impact.gd" id="1_n73f4"]
+[ext_resource type="Texture2D" uid="uid://dui4qxbvw1ntd" path="res://HDRI Textures/HDR_blue_nebulae-1.hdr" id="2_xqycy"]
+[ext_resource type="Script" uid="uid://dobbjt5hiqqg4" path="res://addons/orbit-controls/orbit-controls.gd" id="3_xqycy"]
+
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_d7i5n"]
+panorama = ExtResource("2_xqycy")
+
+[sub_resource type="Sky" id="Sky_n73f4"]
+sky_material = SubResource("PanoramaSkyMaterial_d7i5n")
+
+[sub_resource type="Environment" id="Environment_xqycy"]
+background_mode = 2
+sky = SubResource("Sky_n73f4")
+tonemap_mode = 2
+glow_enabled = true
+
+[node name="WaterImpact" type="Node3D"]
+script = ExtResource("1_n73f4")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_xqycy")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.8240375, -0.16201437, -0.54287535, 0.47512054, -0.32430595, 0.81797683, -0.3085817, -0.9319747, -0.19026387, 0, 2.0064735, 0)
+shadow_enabled = true
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.5753479, 0.81790876, 0, -0.81790876, 0.5753479, 0, 5, 5)
+
+[node name="OrbitControls" type="Node3D" parent="."]
+script = ExtResource("3_xqycy")
+_camera = NodePath("../Camera3D")
+auto_rotate = true
+auto_rotate_speed = 0.082
+metadata/_custom_type_script = "uid://dobbjt5hiqqg4"

@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://ca3ig1qq8pfd"]
+
+[ext_resource type="Script" uid="uid://dpaje57t06lej" path="res://Entities/SandBox/IDE/confined_menu.gd" id="1_3denb"]
+[ext_resource type="Theme" uid="uid://b3klx57slj0l3" path="res://UIUX/soft_retro.tres" id="1_u5sqq"]
+
+[node name="ConfinedMenu" type="Button"]
+offset_right = 274.0
+offset_bottom = 61.0
+theme = ExtResource("1_u5sqq")
+script = ExtResource("1_3denb")
+items = PackedStringArray("Load", "Save", "Preference")

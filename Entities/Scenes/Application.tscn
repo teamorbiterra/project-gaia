@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://bk5eynu7vd4o4"]
+
+[ext_resource type="Script" uid="uid://bngwdmaq8tn48" path="res://Entities/Scripts/application.gd" id="1_kgpv4"]
+
+[node name="Application" type="Node"]
+script = ExtResource("1_kgpv4")

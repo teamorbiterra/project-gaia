@@ -1,0 +1,1388 @@
+[gd_scene load_steps=2 format=3 uid="uid://clo71c8e7eoy8"]
+
+[sub_resource type="GDScript" id="GDScript_cpy3k"]
+script/source = "#extends Control
+#class_name NoiseGenerator
+#
+## Main noise objects
+#var fast_noise: FastNoiseLite
+#var noise_texture: NoiseTexture2D
+#var preview_rect: TextureRect
+#
+## UI containers
+#var main_container: HSplitContainer
+#var controls_panel: ScrollContainer
+#var preview_panel: VBoxContainer
+#var controls_vbox: VBoxContainer
+#
+## Control groups
+#var noise_controls: VBoxContainer
+#var texture_controls: VBoxContainer
+#var fractal_controls: VBoxContainer
+#var cellular_controls: VBoxContainer
+#
+## Virtual file system
+#var saved_textures: Dictionary = {}
+#var save_path: String = \"user://saved_noise_textures.dat\"
+#var current_dialog: Window = null
+#
+## Current values for real-time updates
+#var update_timer: Timer
+#
+#func get_noise_texture():
+	#if fast_noise!=null:
+		#return fast_noise
+	#return null
+#
+#
+#
+#func _ready():
+	#load_saved_textures()
+	#setup_ui()
+	#setup_noise()
+	#create_controls()
+	#update_preview()
+#
+#func setup_ui():
+	## Main layout
+	#main_container = HSplitContainer.new()
+	#add_child(main_container)
+	#main_container.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	#main_container.split_offset = 300
+	#
+	## Controls side
+	#controls_panel = ScrollContainer.new()
+	#main_container.add_child(controls_panel)
+	#controls_panel.custom_minimum_size.x = 300
+	#
+	#controls_vbox = VBoxContainer.new()
+	#controls_panel.add_child(controls_vbox)
+	#controls_vbox.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	#
+	## Preview side
+	#preview_panel = VBoxContainer.new()
+	#main_container.add_child(preview_panel)
+	#
+	## Title
+	#var title = Label.new()
+	#title.text = \"Noise Generator Tool\"
+	#title.add_theme_font_size_override(\"font_size\", 24)
+	#preview_panel.add_child(title)
+	#
+	## Preview texture display
+	#preview_rect = TextureRect.new()
+	#preview_rect.custom_minimum_size = Vector2(512, 512)
+	#preview_rect.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
+	#preview_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	#preview_panel.add_child(preview_rect)
+	#
+	## Save and Load buttons
+	#var save_load_hbox = HBoxContainer.new()
+	#preview_panel.add_child(save_load_hbox)
+	#
+	#var save_button = Button.new()
+	#save_button.text = \"Save Texture\"
+	#var on_save_pressed = func():
+		#show_save_dialog()
+	#save_button.pressed.connect(on_save_pressed)
+	#save_load_hbox.add_child(save_button)
+	#
+	#var load_button = Button.new()
+	#load_button.text = \"Load Texture\"
+	#var on_load_pressed = func():
+		#show_load_dialog()
+	#load_button.pressed.connect(on_load_pressed)
+	#save_load_hbox.add_child(load_button)
+	#
+	## Timer for smooth updates
+	#update_timer = Timer.new()
+	#add_child(update_timer)
+	#update_timer.wait_time = 0.1
+	#update_timer.one_shot = true
+	#var on_timer_timeout = func():
+		#update_preview()
+	#
+	#update_timer.timeout.connect(on_timer_timeout)
+#
+#func setup_noise():
+	## Create FastNoiseLite
+	#fast_noise = FastNoiseLite.new()
+	#fast_noise.seed = 0
+	#fast_noise.frequency = 0.1
+	#fast_noise.noise_type = FastNoiseLite.TYPE_SIMPLEX
+	#fast_noise.fractal_type = FastNoiseLite.FRACTAL_FBM
+	#fast_noise.fractal_octaves = 3
+	#fast_noise.fractal_lacunarity = 2.0
+	#fast_noise.fractal_gain = 0.5
+	#
+	## Create NoiseTexture2D
+	#noise_texture = NoiseTexture2D.new()
+	#noise_texture.width = 512
+	#noise_texture.height = 512
+	#noise_texture.noise = fast_noise
+	#noise_texture.seamless = false
+	#noise_texture.normalize = true
+	#
+	#preview_rect.texture = noise_texture
+#
+#func create_controls():
+	#create_section_header(\"Noise Settings\")
+	#noise_controls = create_section_container()
+	#
+	#add_int_control(fast_noise, \"seed\", \"Seed\", -999999, 999999, 1)
+	#add_float_control(fast_noise, \"frequency\", \"Frequency\", 0.001, 1.0, 0.001)
+	#add_enum_control(fast_noise, \"noise_type\", \"Noise Type\", [
+		#\"Simplex\", \"Simplex Smooth\", \"Cellular\", \"Perlin\", \"Value\", \"Value Cubic\"
+	#])
+	#add_vector3_control(fast_noise, \"offset\", \"Offset\")
+	#
+	#add_separator()
+	#create_section_header(\"Texture Settings\")
+	#texture_controls = create_section_container()
+	#
+	#add_int_control(noise_texture, \"width\", \"Width\", 64, 2048, 64)
+	#add_int_control(noise_texture, \"height\", \"Height\", 64, 2048, 64)
+	#add_bool_control(noise_texture, \"seamless\", \"Seamless\")
+	#add_bool_control(noise_texture, \"normalize\", \"Normalize\")
+	#
+	#add_separator()
+	#create_section_header(\"Fractal Settings\")
+	#fractal_controls = create_section_container()
+	#
+	#add_enum_control(fast_noise, \"fractal_type\", \"Fractal Type\", [
+		#\"None\", \"FBM\", \"Ridged\", \"Ping Pong\"
+	#])
+	#add_int_control(fast_noise, \"fractal_octaves\", \"Octaves\", 1, 10, 1)
+	#add_float_control(fast_noise, \"fractal_lacunarity\", \"Lacunarity\", 0.1, 4.0, 0.1)
+	#add_float_control(fast_noise, \"fractal_gain\", \"Gain\", 0.0, 2.0, 0.01)
+	#add_float_control(fast_noise, \"fractal_weighted_strength\", \"Weighted Strength\", 0.0, 1.0, 0.01)
+	#
+	#add_separator()
+	#create_section_header(\"Cellular Settings\")
+	#cellular_controls = create_section_container()
+	#
+	#add_enum_control(fast_noise, \"cellular_distance_function\", \"Distance Function\", [
+		#\"Euclidean\", \"Euclidean Squared\", \"Manhattan\", \"Hybrid\"
+	#])
+	#add_enum_control(fast_noise, \"cellular_return_type\", \"Return Type\", [
+		#\"Cell Value\", \"Distance\", \"Distance 2\", \"Distance 2 Add\", \"Distance 2 Sub\", \"Distance 2 Mul\", \"Distance 2 Div\"
+	#])
+	#add_float_control(fast_noise, \"cellular_jitter\", \"Jitter\", 0.0, 1.0, 0.01)
+	#
+	#add_separator()
+	#create_section_header(\"Presets\")
+	#create_preset_buttons()
+#
+#func create_section_header(title: String):
+	#var header = Label.new()
+	#header.text = title
+	#header.add_theme_font_size_override(\"font_size\", 16)
+	#controls_vbox.add_child(header)
+#
+#func create_section_container() -> VBoxContainer:
+	#var container = VBoxContainer.new()
+	#controls_vbox.add_child(container)
+	#return container
+#
+#func add_separator():
+	#var sep = HSeparator.new()
+	#controls_vbox.add_child(sep)
+#
+#func add_float_control(target: Object, property: String, label_text: String, min_val: float = -999.0, max_val: float = 999.0, step_val: float = 0.01):
+	#var hbox = HBoxContainer.new()
+	#controls_vbox.add_child(hbox)
+	#
+	#var label = Label.new()
+	#label.text = label_text
+	#label.custom_minimum_size.x = 120
+	#hbox.add_child(label)
+	#
+	#var spinbox = SpinBox.new()
+	#spinbox.min_value = min_val
+	#spinbox.max_value = max_val
+	#spinbox.step = step_val
+	#spinbox.value = target.get(property)
+	#spinbox.custom_minimum_size.x = 150
+	#hbox.add_child(spinbox)
+	#
+	#var on_float_changed = func(value):
+		#target.set(property, value)
+		#schedule_update()
+	#
+	#spinbox.value_changed.connect(on_float_changed)
+#
+#func add_int_control(target: Object, property: String, label_text: String, min_val: int = -999, max_val: int = 999, step_val: int = 1):
+	#var hbox = HBoxContainer.new()
+	#controls_vbox.add_child(hbox)
+	#
+	#var label = Label.new()
+	#label.text = label_text
+	#label.custom_minimum_size.x = 120
+	#hbox.add_child(label)
+	#
+	#var spinbox = SpinBox.new()
+	#spinbox.min_value = min_val
+	#spinbox.max_value = max_val
+	#spinbox.step = step_val
+	#spinbox.value = target.get(property)
+	#spinbox.custom_minimum_size.x = 150
+	#hbox.add_child(spinbox)
+	#
+	#var on_int_changed = func(value):
+		#target.set(property, int(value))
+		#schedule_update()
+	#
+	#spinbox.value_changed.connect(on_int_changed)
+#
+#func add_bool_control(target: Object, property: String, label_text: String):
+	#var checkbox = CheckBox.new()
+	#checkbox.text = label_text
+	#checkbox.button_pressed = target.get(property)
+	#controls_vbox.add_child(checkbox)
+	#
+	#var on_bool_toggled = func(pressed):
+		#target.set(property, pressed)
+		#schedule_update()
+	#
+	#checkbox.toggled.connect(on_bool_toggled)
+#
+#func add_enum_control(target: Object, property: String, label_text: String, options: Array):
+	#var hbox = HBoxContainer.new()
+	#controls_vbox.add_child(hbox)
+	#
+	#var label = Label.new()
+	#label.text = label_text
+	#label.custom_minimum_size.x = 120
+	#hbox.add_child(label)
+	#
+	#var option_button = OptionButton.new()
+	#option_button.custom_minimum_size.x = 150
+	#hbox.add_child(option_button)
+	#
+	#for option in options:
+		#option_button.add_item(option)
+	#
+	#option_button.selected = target.get(property)
+	#
+	#var on_item_selected = func(index):
+		#target.set(property, index)
+		#schedule_update()
+	#
+	#option_button.item_selected.connect(on_item_selected)
+#
+#func add_vector3_control(target: Object, property: String, label_text: String):
+	#var vbox = VBoxContainer.new()
+	#controls_vbox.add_child(vbox)
+	#
+	#var label = Label.new()
+	#label.text = label_text
+	#vbox.add_child(label)
+	#
+	#var current_vec = target.get(property)
+	#
+	#var x_hbox = HBoxContainer.new()
+	#vbox.add_child(x_hbox)
+	#var x_label = Label.new()
+	#x_label.text = \"X:\"
+	#x_label.custom_minimum_size.x = 30
+	#x_hbox.add_child(x_label)
+	#var x_spin = SpinBox.new()
+	#x_spin.value = current_vec.x
+	#x_spin.step = 0.1
+	#x_spin.custom_minimum_size.x = 100
+	#x_hbox.add_child(x_spin)
+	#
+	#var y_hbox = HBoxContainer.new()
+	#vbox.add_child(y_hbox)
+	#var y_label = Label.new()
+	#y_label.text = \"Y:\"
+	#y_label.custom_minimum_size.x = 30
+	#y_hbox.add_child(y_label)
+	#var y_spin = SpinBox.new()
+	#y_spin.value = current_vec.y
+	#y_spin.step = 0.1
+	#y_spin.custom_minimum_size.x = 100
+	#y_hbox.add_child(y_spin)
+	#
+	#var z_hbox = HBoxContainer.new()
+	#vbox.add_child(z_hbox)
+	#var z_label = Label.new()
+	#z_label.text = \"Z:\"
+	#z_label.custom_minimum_size.x = 30
+	#z_hbox.add_child(z_label)
+	#var z_spin = SpinBox.new()
+	#z_spin.value = current_vec.z
+	#z_spin.step = 0.1
+	#z_spin.custom_minimum_size.x = 100
+	#z_hbox.add_child(z_spin)
+	#
+	#var update_vector = func():
+		#target.set(property, Vector3(x_spin.value, y_spin.value, z_spin.value))
+		#schedule_update()
+	#
+	#var on_x_changed = func(_v): update_vector.call()
+	#var on_y_changed = func(_v): update_vector.call()
+	#var on_z_changed = func(_v): update_vector.call()
+	#
+	#x_spin.value_changed.connect(on_x_changed)
+	#y_spin.value_changed.connect(on_y_changed)
+	#z_spin.value_changed.connect(on_z_changed)
+#
+#func create_preset_buttons():
+	#var preset_container = VBoxContainer.new()
+	#controls_vbox.add_child(preset_container)
+	#
+	#var presets = [
+		#{\"name\": \"Clouds\", \"settings\": {\"noise_type\": 0, \"frequency\": 0.05, \"fractal_octaves\": 4, \"fractal_gain\": 0.6}},
+		#{\"name\": \"Marble\", \"settings\": {\"noise_type\": 1, \"frequency\": 0.1, \"fractal_octaves\": 6, \"fractal_gain\": 0.4}},
+		#{\"name\": \"Wood\", \"settings\": {\"noise_type\": 4, \"frequency\": 0.2, \"fractal_octaves\": 3, \"fractal_gain\": 0.7}},
+		#{\"name\": \"Cellular\", \"settings\": {\"noise_type\": 2, \"frequency\": 0.1, \"cellular_jitter\": 0.8}},
+		#{\"name\": \"Mountains\", \"settings\": {\"noise_type\": 0, \"frequency\": 0.01, \"fractal_type\": 2, \"fractal_octaves\": 8}}
+	#]
+	#
+	#for preset in presets:
+		#var button = Button.new()
+		#button.text = preset.name
+		#preset_container.add_child(button)
+		#
+		#var preset_settings = preset.settings  # Capture the settings
+		#var on_preset_pressed = func():
+			#apply_preset(preset_settings)
+		#
+		#button.pressed.connect(on_preset_pressed)
+#
+#func apply_preset(settings: Dictionary):
+	#for key in settings.keys():
+		#if fast_noise.has_method(\"set\"):
+			#fast_noise.set(key, settings[key])
+	#
+	## Refresh all controls by recreating them
+	#for child in controls_vbox.get_children():
+		#child.queue_free()
+	#
+	#await get_tree().process_frame
+	#create_controls()
+	#update_preview()
+#
+#func schedule_update():
+	#if update_timer:
+		#update_timer.start()
+#
+#func update_preview():
+	#if noise_texture:
+		## Force texture update
+		#var old_noise = noise_texture.noise
+		#noise_texture.noise = null
+		#noise_texture.noise = old_noise
+#
+#func load_saved_textures():
+	#if FileAccess.file_exists(save_path):
+		#var file = FileAccess.open(save_path, FileAccess.READ)
+		#if file:
+			#var json_string = file.get_as_text()
+			#file.close()
+			#
+			#var json = JSON.new()
+			#var parse_result = json.parse(json_string)
+			#if parse_result == OK:
+				#saved_textures = json.data
+			#else:
+				#saved_textures = {}
+	#else:
+		#saved_textures = {}
+#
+#func save_texture_data():
+	#var file = FileAccess.open(save_path, FileAccess.WRITE)
+	#if file:
+		#var json_string = JSON.stringify(saved_textures)
+		#file.store_string(json_string)
+		#file.close()
+#
+#func show_save_dialog():
+	#if current_dialog:
+		#current_dialog.queue_free()
+		#current_dialog = null
+	#
+	#var dialog = AcceptDialog.new()
+	#dialog.title = \"Save Noise Texture\"
+	#add_child(dialog)
+	#current_dialog = dialog
+	#
+	#var vbox = VBoxContainer.new()
+	#dialog.add_child(vbox)
+	#
+	#var label = Label.new()
+	#label.text = \"Enter texture name:\"
+	#vbox.add_child(label)
+	#
+	#var line_edit = LineEdit.new()
+	#line_edit.text = \"my_texture_\" + str(Time.get_unix_time_from_system())
+	#line_edit.custom_minimum_size.x = 300
+	#vbox.add_child(line_edit)
+	#
+	#var button_hbox = HBoxContainer.new()
+	#vbox.add_child(button_hbox)
+	#
+	#var save_btn = Button.new()
+	#save_btn.text = \"Save\"
+	#button_hbox.add_child(save_btn)
+	#
+	#var cancel_btn = Button.new()
+	#cancel_btn.text = \"Cancel\"
+	#button_hbox.add_child(cancel_btn)
+	#
+	#var on_save = func():
+		#var texture_name = line_edit.text.strip_edges()
+		#if texture_name.length() > 0:
+			#save_current_texture(texture_name)
+			#current_dialog = null
+			#dialog.queue_free()
+	#
+	#var on_cancel = func():
+		#current_dialog = null
+		#dialog.queue_free()
+	#
+	#save_btn.pressed.connect(on_save)
+	#cancel_btn.pressed.connect(on_cancel)
+	#line_edit.text_submitted.connect(func(_text): on_save.call())
+	#
+	#dialog.popup_centered()
+	#line_edit.grab_focus()
+#
+#func save_current_texture(texture_name: String):
+	#var texture_data = {
+		#\"noise_settings\": get_noise_settings(),
+		#\"texture_settings\": get_texture_settings(),
+		#\"timestamp\": Time.get_unix_time_from_system()
+	#}
+	#
+	#saved_textures[texture_name] = texture_data
+	#save_texture_data()
+	#print(\"Texture saved as: \", texture_name)
+#
+#func get_noise_settings() -> Dictionary:
+	#return {
+		#\"seed\": fast_noise.seed,
+		#\"frequency\": fast_noise.frequency,
+		#\"noise_type\": fast_noise.noise_type,
+		#\"offset\": {
+			#\"x\": fast_noise.offset.x,
+			#\"y\": fast_noise.offset.y,
+			#\"z\": fast_noise.offset.z
+		#},
+		#\"fractal_type\": fast_noise.fractal_type,
+		#\"fractal_octaves\": fast_noise.fractal_octaves,
+		#\"fractal_lacunarity\": fast_noise.fractal_lacunarity,
+		#\"fractal_gain\": fast_noise.fractal_gain,
+		#\"fractal_weighted_strength\": fast_noise.fractal_weighted_strength,
+		#\"cellular_distance_function\": fast_noise.cellular_distance_function,
+		#\"cellular_return_type\": fast_noise.cellular_return_type,
+		#\"cellular_jitter\": fast_noise.cellular_jitter
+	#}
+#
+#func get_texture_settings() -> Dictionary:
+	#return {
+		#\"width\": noise_texture.width,
+		#\"height\": noise_texture.height,
+		#\"seamless\": noise_texture.seamless,
+		#\"normalize\": noise_texture.normalize
+	#}
+#
+#func show_load_dialog():
+	#if current_dialog:
+		#current_dialog.queue_free()
+		#current_dialog = null
+	#
+	#if saved_textures.is_empty():
+		#show_message(\"No saved textures found!\")
+		#return
+	#
+	#var dialog = AcceptDialog.new()
+	#dialog.title = \"Load Noise Texture\"
+	#add_child(dialog)
+	#current_dialog = dialog
+	#
+	#var vbox = VBoxContainer.new()
+	#dialog.add_child(vbox)
+	#
+	#var label = Label.new()
+	#label.text = \"Select texture to load:\"
+	#vbox.add_child(label)
+	#
+	#var scroll = ScrollContainer.new()
+	#scroll.custom_minimum_size.y = 250
+	#vbox.add_child(scroll)
+	#
+	#var list_vbox = VBoxContainer.new()
+	#scroll.add_child(list_vbox)
+	#
+	#for texture_name in saved_textures.keys():
+		#var texture_data = saved_textures[texture_name]
+		#
+		## Create a container for each texture entry
+		#var entry_container = VBoxContainer.new()
+		#list_vbox.add_child(entry_container)
+		#
+		## Texture preview (create a small preview)
+		#var preview_container = HBoxContainer.new()
+		#entry_container.add_child(preview_container)
+		#
+		#var mini_preview = TextureRect.new()
+		#mini_preview.custom_minimum_size = Vector2(64, 64)
+		#mini_preview.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
+		#mini_preview.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		#
+		## Create a small noise texture for preview
+		#var preview_noise = FastNoiseLite.new()
+		#var preview_texture = NoiseTexture2D.new()
+		#apply_noise_settings_to_object(preview_noise, texture_data.noise_settings)
+		#preview_texture.noise = preview_noise
+		#preview_texture.width = 64
+		#preview_texture.height = 64
+		#mini_preview.texture = preview_texture
+		#
+		#preview_container.add_child(mini_preview)
+		#
+		## Info and load button
+		#var info_container = VBoxContainer.new()
+		#preview_container.add_child(info_container)
+		#
+		#var name_label = Label.new()
+		#name_label.text = texture_name
+		#name_label.add_theme_font_size_override(\"font_size\", 14)
+		#info_container.add_child(name_label)
+		#
+		#var date_label = Label.new()
+		#date_label.text = \"Saved: \" + Time.get_datetime_string_from_unix_time(texture_data.timestamp)
+		#date_label.add_theme_font_size_override(\"font_size\", 10)
+		#info_container.add_child(date_label)
+		#
+		#var button_container = HBoxContainer.new()
+		#info_container.add_child(button_container)
+		#
+		#var load_btn = Button.new()
+		#load_btn.text = \"Load\"
+		#button_container.add_child(load_btn)
+		#
+		#var delete_btn = Button.new()
+		#delete_btn.text = \"Delete\"
+		#button_container.add_child(delete_btn)
+		#
+		## Connect buttons
+		#var texture_name_copy = texture_name  # Capture for closure
+		#var on_load_texture = func():
+			#load_texture(texture_name_copy)
+			#current_dialog = null
+			#dialog.queue_free()
+		#
+		#var on_delete_texture = func():
+			#delete_texture(texture_name_copy)
+			#current_dialog = null
+			#dialog.queue_free()
+			## Use call_deferred to avoid dialog conflicts
+			#call_deferred(\"show_load_dialog\")
+		#
+		#load_btn.pressed.connect(on_load_texture)
+		#delete_btn.pressed.connect(on_delete_texture)
+		#
+		## Add separator
+		#var separator = HSeparator.new()
+		#entry_container.add_child(separator)
+	#
+	#var close_btn = Button.new()
+	#close_btn.text = \"Close\"
+	#vbox.add_child(close_btn)
+	#
+	#var on_close = func():
+		#current_dialog = null
+		#dialog.queue_free()
+	#
+	#close_btn.pressed.connect(on_close)
+	#dialog.popup_centered()
+#
+#func delete_texture(texture_name: String):
+	#if saved_textures.has(texture_name):
+		#saved_textures.erase(texture_name)
+		#save_texture_data()
+		## Use await to properly handle dialog timing
+		#await show_message(\"Texture '\" + texture_name + \"' deleted!\")
+#
+#func apply_noise_settings_to_object(target_noise: FastNoiseLite, settings: Dictionary):
+	#target_noise.seed = settings.seed
+	#target_noise.frequency = settings.frequency
+	#target_noise.noise_type = settings.noise_type
+	#target_noise.offset = Vector3(settings.offset.x, settings.offset.y, settings.offset.z)
+	#target_noise.fractal_type = settings.fractal_type
+	#target_noise.fractal_octaves = settings.fractal_octaves
+	#target_noise.fractal_lacunarity = settings.fractal_lacunarity
+	#target_noise.fractal_gain = settings.fractal_gain
+	#target_noise.fractal_weighted_strength = settings.fractal_weighted_strength
+	#target_noise.cellular_distance_function = settings.cellular_distance_function
+	#target_noise.cellular_return_type = settings.cellular_return_type
+	#target_noise.cellular_jitter = settings.cellular_jitter
+#
+#func load_texture(texture_name: String):
+	#if not saved_textures.has(texture_name):
+		#show_message(\"Texture not found!\")
+		#return
+	#
+	#var texture_data = saved_textures[texture_name]
+	#apply_noise_settings(texture_data.noise_settings)
+	#apply_texture_settings(texture_data.texture_settings)
+	#
+	## Refresh all controls
+	#for child in controls_vbox.get_children():
+		#child.queue_free()
+	#
+	#await get_tree().process_frame
+	#create_controls()
+	#update_preview()
+	#print(\"Texture loaded: \", texture_name)
+#
+#func apply_noise_settings(settings: Dictionary):
+	#apply_noise_settings_to_object(fast_noise, settings)
+#
+#func apply_texture_settings(settings: Dictionary):
+	#noise_texture.width = settings.width
+	#noise_texture.height = settings.height
+	#noise_texture.seamless = settings.seamless
+	#noise_texture.normalize = settings.normalize
+#
+#
+#func show_message(text: String):
+	#if current_dialog:
+		#current_dialog.queue_free()
+		#current_dialog = null
+	#
+	## Wait until the next frame to ensure the old dialog is gone
+	#await get_tree().process_frame
+	#
+	## Use call_deferred to create the new dialog safely
+	#call_deferred(\"_deferred_show_message\", text)
+	#
+#func _deferred_show_message(text: String):
+	## Check if a dialog is already active. If it is, do nothing.
+	#if current_dialog != null:
+		#return
+	#
+	#var dialog = AcceptDialog.new()
+	#dialog.transient = true  # This is crucial for exclusive popups :cite[9]
+	#dialog.dialog_text = text
+	#add_child(dialog)
+	#current_dialog = dialog
+	#dialog.popup_centered()
+	#
+	## Ensure the dialog is cleaned up and the reference is cleared when closed
+	#dialog.confirmed.connect(_on_message_dialog_confirmed.bind(dialog))
+#
+## New function to handle dialog confirmation
+#func _on_message_dialog_confirmed(dialog: AcceptDialog):
+	#if current_dialog == dialog:
+		#current_dialog = null
+	#dialog.queue_free()
+
+
+# version 2: Fixed adaptive window problem
+extends Control
+class_name NoiseGenerator
+
+# Main noise objects
+var fast_noise: FastNoiseLite
+var noise_texture: NoiseTexture2D
+var preview_rect: TextureRect
+
+# UI containers
+var main_container: HSplitContainer
+var controls_panel: ScrollContainer
+var preview_panel: VBoxContainer
+var controls_vbox: VBoxContainer
+
+# Control groups
+var noise_controls: VBoxContainer
+var texture_controls: VBoxContainer
+var fractal_controls: VBoxContainer
+var cellular_controls: VBoxContainer
+
+# Virtual file system
+var saved_textures: Dictionary = {}
+var save_path: String = \"user://saved_noise_textures.dat\"
+var current_dialog: Window = null
+
+# Current values for real-time updates
+var update_timer: Timer
+
+func _ready():
+	load_saved_textures()
+	setup_ui()
+	setup_noise()
+	create_controls()
+	update_preview()
+	
+func get_current_texture():
+	return noise_texture
+
+func get_current_texture_as_normal_map():
+	var normal_map_texture= noise_texture.duplicate(true)
+	normal_map_texture.as_normal_map=true	
+	return normal_map_texture
+
+
+func setup_ui():
+	# Main layout - full screen
+	main_container = HSplitContainer.new()
+	add_child(main_container)
+	main_container.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	main_container.split_offset = 400  # Wider controls panel for 1080p
+	
+	# Controls side
+	controls_panel = ScrollContainer.new()
+	main_container.add_child(controls_panel)
+	controls_panel.custom_minimum_size.x = 400
+	
+	controls_vbox = VBoxContainer.new()
+	controls_panel.add_child(controls_vbox)
+	controls_vbox.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	
+	# Preview side - takes most of the screen
+	preview_panel = VBoxContainer.new()
+	main_container.add_child(preview_panel)
+	
+	# Title with larger font for high DPI
+	var title = Label.new()
+	title.text = \"Noise Generator Tool\"
+	title.add_theme_font_size_override(\"font_size\", 32)
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	preview_panel.add_child(title)
+	
+	# Preview texture display - larger for 1080p
+	preview_rect = TextureRect.new()
+	preview_rect.custom_minimum_size = Vector2(1024, 768)  # Larger preview area
+	preview_rect.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
+	preview_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	preview_panel.add_child(preview_rect)
+	
+	# Save and Load buttons - larger and better spaced
+	var save_load_hbox = HBoxContainer.new()
+	save_load_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	preview_panel.add_child(save_load_hbox)
+	
+	var save_button = Button.new()
+	save_button.text = \"Save Texture\"
+	save_button.custom_minimum_size.y = 40
+	var on_save_pressed = func():
+		show_save_dialog()
+	save_button.pressed.connect(on_save_pressed)
+	save_load_hbox.add_child(save_button)
+	
+	var load_button = Button.new()
+	load_button.text = \"Load Texture\"
+	load_button.custom_minimum_size.y = 40
+	var on_load_pressed = func():
+		show_load_dialog()
+	load_button.pressed.connect(on_load_pressed)
+	save_load_hbox.add_child(load_button)
+	
+	# Timer for smooth updates
+	update_timer = Timer.new()
+	add_child(update_timer)
+	update_timer.wait_time = 0.1
+	update_timer.one_shot = true
+	var on_timer_timeout = func():
+		update_preview()
+	
+	update_timer.timeout.connect(on_timer_timeout)
+
+func setup_noise():
+	# Create FastNoiseLite
+	fast_noise = FastNoiseLite.new()
+	fast_noise.seed = 0
+	fast_noise.frequency = 0.1
+	fast_noise.noise_type = FastNoiseLite.TYPE_SIMPLEX
+	fast_noise.fractal_type = FastNoiseLite.FRACTAL_FBM
+	fast_noise.fractal_octaves = 3
+	fast_noise.fractal_lacunarity = 2.0
+	fast_noise.fractal_gain = 0.5
+	
+	# Create NoiseTexture2D with higher resolution for 1080p
+	noise_texture = NoiseTexture2D.new()
+	noise_texture.width = 1024
+	noise_texture.height = 768
+	noise_texture.noise = fast_noise
+	noise_texture.seamless = false
+	noise_texture.normalize = true
+	
+	preview_rect.texture = noise_texture
+
+func create_controls():
+	# Use larger fonts and controls for high DPI
+	create_section_header(\"Noise Settings\", 20)
+	noise_controls = create_section_container()
+	
+	add_int_control(fast_noise, \"seed\", \"Seed\", -999999, 999999, 1)
+	add_float_control(fast_noise, \"frequency\", \"Frequency\", 0.001, 1.0, 0.001)
+	add_enum_control(fast_noise, \"noise_type\", \"Noise Type\", [
+		\"Simplex\", \"Simplex Smooth\", \"Cellular\", \"Perlin\", \"Value\", \"Value Cubic\"
+	])
+	add_vector3_control(fast_noise, \"offset\", \"Offset\")
+	
+	add_separator()
+	create_section_header(\"Texture Settings\", 20)
+	texture_controls = create_section_container()
+	
+	add_int_control(noise_texture, \"width\", \"Width\", 64, 2048, 64)
+	add_int_control(noise_texture, \"height\", \"Height\", 64, 2048, 64)
+	add_bool_control(noise_texture, \"seamless\", \"Seamless\")
+	add_bool_control(noise_texture, \"normalize\", \"Normalize\")
+	
+	add_separator()
+	create_section_header(\"Fractal Settings\", 20)
+	fractal_controls = create_section_container()
+	
+	add_enum_control(fast_noise, \"fractal_type\", \"Fractal Type\", [
+		\"None\", \"FBM\", \"Ridged\", \"Ping Pong\"
+	])
+	add_int_control(fast_noise, \"fractal_octaves\", \"Octaves\", 1, 10, 1)
+	add_float_control(fast_noise, \"fractal_lacunarity\", \"Lacunarity\", 0.1, 4.0, 0.1)
+	add_float_control(fast_noise, \"fractal_gain\", \"Gain\", 0.0, 2.0, 0.01)
+	add_float_control(fast_noise, \"fractal_weighted_strength\", \"Weighted Strength\", 0.0, 1.0, 0.01)
+	
+	add_separator()
+	create_section_header(\"Cellular Settings\", 20)
+	cellular_controls = create_section_container()
+	
+	add_enum_control(fast_noise, \"cellular_distance_function\", \"Distance Function\", [
+		\"Euclidean\", \"Euclidean Squared\", \"Manhattan\", \"Hybrid\"
+	])
+	add_enum_control(fast_noise, \"cellular_return_type\", \"Return Type\", [
+		\"Cell Value\", \"Distance\", \"Distance 2\", \"Distance 2 Add\", \"Distance 2 Sub\", \"Distance 2 Mul\", \"Distance 2 Div\"
+	])
+	add_float_control(fast_noise, \"cellular_jitter\", \"Jitter\", 0.0, 1.0, 0.01)
+	
+	add_separator()
+	create_section_header(\"Presets\", 20)
+	create_preset_buttons()
+
+func create_section_header(title: String, font_size: int = 16):
+	var header = Label.new()
+	header.text = title
+	header.add_theme_font_size_override(\"font_size\", font_size)
+	controls_vbox.add_child(header)
+
+func create_section_container() -> VBoxContainer:
+	var container = VBoxContainer.new()
+	controls_vbox.add_child(container)
+	return container
+
+func add_separator():
+	var sep = HSeparator.new()
+	controls_vbox.add_child(sep)
+
+func add_float_control(target: Object, property: String, label_text: String, min_val: float = -999.0, max_val: float = 999.0, step_val: float = 0.01):
+	var hbox = HBoxContainer.new()
+	controls_vbox.add_child(hbox)
+	
+	var label = Label.new()
+	label.text = label_text
+	label.custom_minimum_size.x = 150  # Wider labels for 1080p
+	hbox.add_child(label)
+	
+	var spinbox = SpinBox.new()
+	spinbox.min_value = min_val
+	spinbox.max_value = max_val
+	spinbox.step = step_val
+	spinbox.value = target.get(property)
+	spinbox.custom_minimum_size.x = 200  # Wider spinboxes
+	hbox.add_child(spinbox)
+	
+	var on_float_changed = func(value):
+		target.set(property, value)
+		schedule_update()
+	
+	spinbox.value_changed.connect(on_float_changed)
+
+func add_int_control(target: Object, property: String, label_text: String, min_val: int = -999, max_val: int = 999, step_val: int = 1):
+	var hbox = HBoxContainer.new()
+	controls_vbox.add_child(hbox)
+	
+	var label = Label.new()
+	label.text = label_text
+	label.custom_minimum_size.x = 150
+	hbox.add_child(label)
+	
+	var spinbox = SpinBox.new()
+	spinbox.min_value = min_val
+	spinbox.max_value = max_val
+	spinbox.step = step_val
+	spinbox.value = target.get(property)
+	spinbox.custom_minimum_size.x = 200
+	hbox.add_child(spinbox)
+	
+	var on_int_changed = func(value):
+		target.set(property, int(value))
+		schedule_update()
+	
+	spinbox.value_changed.connect(on_int_changed)
+
+func add_bool_control(target: Object, property: String, label_text: String):
+	var checkbox = CheckBox.new()
+	checkbox.text = label_text
+	checkbox.button_pressed = target.get(property)
+	controls_vbox.add_child(checkbox)
+	
+	var on_bool_toggled = func(pressed):
+		target.set(property, pressed)
+		schedule_update()
+	
+	checkbox.toggled.connect(on_bool_toggled)
+
+func add_enum_control(target: Object, property: String, label_text: String, options: Array):
+	var hbox = HBoxContainer.new()
+	controls_vbox.add_child(hbox)
+	
+	var label = Label.new()
+	label.text = label_text
+	label.custom_minimum_size.x = 150
+	hbox.add_child(label)
+	
+	var option_button = OptionButton.new()
+	option_button.custom_minimum_size.x = 200
+	hbox.add_child(option_button)
+	
+	for option in options:
+		option_button.add_item(option)
+	
+	option_button.selected = target.get(property)
+	
+	var on_item_selected = func(index):
+		target.set(property, index)
+		schedule_update()
+	
+	option_button.item_selected.connect(on_item_selected)
+
+func add_vector3_control(target: Object, property: String, label_text: String):
+	var vbox = VBoxContainer.new()
+	controls_vbox.add_child(vbox)
+	
+	var label = Label.new()
+	label.text = label_text
+	vbox.add_child(label)
+	
+	var current_vec = target.get(property)
+	
+	var x_hbox = HBoxContainer.new()
+	vbox.add_child(x_hbox)
+	var x_label = Label.new()
+	x_label.text = \"X:\"
+	x_label.custom_minimum_size.x = 40
+	x_hbox.add_child(x_label)
+	var x_spin = SpinBox.new()
+	x_spin.value = current_vec.x
+	x_spin.step = 0.1
+	x_spin.custom_minimum_size.x = 120
+	x_hbox.add_child(x_spin)
+	
+	var y_hbox = HBoxContainer.new()
+	vbox.add_child(y_hbox)
+	var y_label = Label.new()
+	y_label.text = \"Y:\"
+	y_label.custom_minimum_size.x = 40
+	y_hbox.add_child(y_label)
+	var y_spin = SpinBox.new()
+	y_spin.value = current_vec.y
+	y_spin.step = 0.1
+	y_spin.custom_minimum_size.x = 120
+	y_hbox.add_child(y_spin)
+	
+	var z_hbox = HBoxContainer.new()
+	vbox.add_child(z_hbox)
+	var z_label = Label.new()
+	z_label.text = \"Z:\"
+	z_label.custom_minimum_size.x = 40
+	z_hbox.add_child(z_label)
+	var z_spin = SpinBox.new()
+	z_spin.value = current_vec.z
+	z_spin.step = 0.1
+	z_spin.custom_minimum_size.x = 120
+	z_hbox.add_child(z_spin)
+	
+	var update_vector = func():
+		target.set(property, Vector3(x_spin.value, y_spin.value, z_spin.value))
+		schedule_update()
+	
+	var on_x_changed = func(_v): update_vector.call()
+	var on_y_changed = func(_v): update_vector.call()
+	var on_z_changed = func(_v): update_vector.call()
+	
+	x_spin.value_changed.connect(on_x_changed)
+	y_spin.value_changed.connect(on_y_changed)
+	z_spin.value_changed.connect(on_z_changed)
+
+func create_preset_buttons():
+	var preset_container = VBoxContainer.new()
+	controls_vbox.add_child(preset_container)
+	
+	var presets = [
+		{\"name\": \"Clouds\", \"settings\": {\"noise_type\": 0, \"frequency\": 0.05, \"fractal_octaves\": 4, \"fractal_gain\": 0.6}},
+		{\"name\": \"Marble\", \"settings\": {\"noise_type\": 1, \"frequency\": 0.1, \"fractal_octaves\": 6, \"fractal_gain\": 0.4}},
+		{\"name\": \"Wood\", \"settings\": {\"noise_type\": 4, \"frequency\": 0.2, \"fractal_octaves\": 3, \"fractal_gain\": 0.7}},
+		{\"name\": \"Cellular\", \"settings\": {\"noise_type\": 2, \"frequency\": 0.1, \"cellular_jitter\": 0.8}},
+		{\"name\": \"Mountains\", \"settings\": {\"noise_type\": 0, \"frequency\": 0.01, \"fractal_type\": 2, \"fractal_octaves\": 8}}
+	]
+	
+	for preset in presets:
+		var button = Button.new()
+		button.text = preset.name
+		button.custom_minimum_size.y = 35  # Larger buttons
+		preset_container.add_child(button)
+		
+		var preset_settings = preset.settings
+		var on_preset_pressed = func():
+			apply_preset(preset_settings)
+		
+		button.pressed.connect(on_preset_pressed)
+
+func apply_preset(settings: Dictionary):
+	for key in settings.keys():
+		if fast_noise.has_method(\"set\"):
+			fast_noise.set(key, settings[key])
+	
+	# Refresh all controls by recreating them
+	for child in controls_vbox.get_children():
+		child.queue_free()
+	
+	await get_tree().process_frame
+	create_controls()
+	update_preview()
+
+func schedule_update():
+	if update_timer:
+		update_timer.start()
+
+func update_preview():
+	if noise_texture:
+		# Force texture update
+		var old_noise = noise_texture.noise
+		noise_texture.noise = null
+		noise_texture.noise = old_noise
+
+func load_saved_textures():
+	if FileAccess.file_exists(save_path):
+		var file = FileAccess.open(save_path, FileAccess.READ)
+		if file:
+			var json_string = file.get_as_text()
+			file.close()
+			
+			var json = JSON.new()
+			var parse_result = json.parse(json_string)
+			if parse_result == OK:
+				saved_textures = json.data
+			else:
+				saved_textures = {}
+	else:
+		saved_textures = {}
+
+func save_texture_data():
+	var file = FileAccess.open(save_path, FileAccess.WRITE)
+	if file:
+		var json_string = JSON.stringify(saved_textures)
+		file.store_string(json_string)
+		file.close()
+
+func show_save_dialog():
+	if current_dialog:
+		current_dialog.queue_free()
+		current_dialog = null
+	
+	var dialog = AcceptDialog.new()
+	dialog.transient = true
+	dialog.title = \"Save Noise Texture\"
+	dialog.min_size = Vector2(500, 200)  # Larger dialog for 1080p
+	add_child(dialog)
+	current_dialog = dialog
+	
+	var vbox = VBoxContainer.new()
+	vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	dialog.add_child(vbox)
+	
+	var label = Label.new()
+	label.text = \"Enter texture name:\"
+	vbox.add_child(label)
+	
+	var line_edit = LineEdit.new()
+	line_edit.text = \"my_texture_\" + str(Time.get_unix_time_from_system())
+	line_edit.custom_minimum_size.x = 480
+	line_edit.custom_minimum_size.y = 35
+	vbox.add_child(line_edit)
+	
+	var button_hbox = HBoxContainer.new()
+	vbox.add_child(button_hbox)
+	
+	var save_btn = Button.new()
+	save_btn.text = \"Save\"
+	save_btn.custom_minimum_size.y = 40
+	button_hbox.add_child(save_btn)
+	
+	var cancel_btn = Button.new()
+	cancel_btn.text = \"Cancel\"
+	cancel_btn.custom_minimum_size.y = 40
+	button_hbox.add_child(cancel_btn)
+	
+	var on_save = func():
+		var texture_name = line_edit.text.strip_edges()
+		if texture_name.length() > 0:
+			save_current_texture(texture_name)
+			current_dialog = null
+			dialog.queue_free()
+	
+	var on_cancel = func():
+		current_dialog = null
+		dialog.queue_free()
+	
+	save_btn.pressed.connect(on_save)
+	cancel_btn.pressed.connect(on_cancel)
+	line_edit.text_submitted.connect(func(_text): on_save.call())
+	
+	dialog.popup_centered()
+	line_edit.grab_focus()
+
+func save_current_texture(texture_name: String):
+	var texture_data = {
+		\"noise_settings\": get_noise_settings(),
+		\"texture_settings\": get_texture_settings(),
+		\"timestamp\": Time.get_unix_time_from_system()
+	}
+	
+	saved_textures[texture_name] = texture_data
+	save_texture_data()
+	show_message(\"Texture saved as: \" + texture_name)
+
+func get_noise_settings() -> Dictionary:
+	return {
+		\"seed\": fast_noise.seed,
+		\"frequency\": fast_noise.frequency,
+		\"noise_type\": fast_noise.noise_type,
+		\"offset\": {
+			\"x\": fast_noise.offset.x,
+			\"y\": fast_noise.offset.y,
+			\"z\": fast_noise.offset.z
+		},
+		\"fractal_type\": fast_noise.fractal_type,
+		\"fractal_octaves\": fast_noise.fractal_octaves,
+		\"fractal_lacunarity\": fast_noise.fractal_lacunarity,
+		\"fractal_gain\": fast_noise.fractal_gain,
+		\"fractal_weighted_strength\": fast_noise.fractal_weighted_strength,
+		\"cellular_distance_function\": fast_noise.cellular_distance_function,
+		\"cellular_return_type\": fast_noise.cellular_return_type,
+		\"cellular_jitter\": fast_noise.cellular_jitter
+	}
+
+func get_texture_settings() -> Dictionary:
+	return {
+		\"width\": noise_texture.width,
+		\"height\": noise_texture.height,
+		\"seamless\": noise_texture.seamless,
+		\"normalize\": noise_texture.normalize
+	}
+
+func show_load_dialog():
+	if current_dialog != null:
+		return
+	
+	if saved_textures.is_empty():
+		show_message(\"No saved textures found!\")
+		return
+	
+	var dialog = AcceptDialog.new()
+	dialog.transient = true
+	dialog.title = \"Load Noise Texture\"
+	dialog.min_size = Vector2(600, 500)  # Larger dialog for texture list
+	add_child(dialog)
+	current_dialog = dialog
+	
+	var vbox = VBoxContainer.new()
+	vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	dialog.add_child(vbox)
+	
+	var label = Label.new()
+	label.text = \"Select texture to load:\"
+	vbox.add_child(label)
+	
+	var scroll = ScrollContainer.new()
+	scroll.custom_minimum_size.y = 400
+	vbox.add_child(scroll)
+	
+	var list_vbox = VBoxContainer.new()
+	scroll.add_child(list_vbox)
+	
+	for texture_name in saved_textures.keys():
+		var texture_data = saved_textures[texture_name]
+		
+		# Create a container for each texture entry
+		var entry_container = VBoxContainer.new()
+		list_vbox.add_child(entry_container)
+		
+		# Texture preview (create a small preview)
+		var preview_container = HBoxContainer.new()
+		entry_container.add_child(preview_container)
+		
+		var mini_preview = TextureRect.new()
+		mini_preview.custom_minimum_size = Vector2(80, 80)  # Larger preview thumbnails
+		mini_preview.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
+		mini_preview.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		
+		# Create a small noise texture for preview
+		var preview_noise = FastNoiseLite.new()
+		var preview_texture = NoiseTexture2D.new()
+		apply_noise_settings_to_object(preview_noise, texture_data.noise_settings)
+		preview_texture.noise = preview_noise
+		preview_texture.width = 80
+		preview_texture.height = 80
+		mini_preview.texture = preview_texture
+		
+		preview_container.add_child(mini_preview)
+		
+		# Info and load button
+		var info_container = VBoxContainer.new()
+		preview_container.add_child(info_container)
+		
+		var name_label = Label.new()
+		name_label.text = texture_name
+		name_label.add_theme_font_size_override(\"font_size\", 16)  # Larger font
+		info_container.add_child(name_label)
+		
+		var date_label = Label.new()
+		date_label.text = \"Saved: \" + Time.get_datetime_string_from_unix_time(texture_data.timestamp)
+		date_label.add_theme_font_size_override(\"font_size\", 12)
+		info_container.add_child(date_label)
+		
+		var button_container = HBoxContainer.new()
+		info_container.add_child(button_container)
+		
+		var load_btn = Button.new()
+		load_btn.text = \"Load\"
+		load_btn.custom_minimum_size.y = 30
+		button_container.add_child(load_btn)
+		
+		var delete_btn = Button.new()
+		delete_btn.text = \"Delete\"
+		delete_btn.custom_minimum_size.y = 30
+		button_container.add_child(delete_btn)
+		
+		# Connect buttons
+		var texture_name_copy = texture_name
+		var on_load_texture = func():
+			load_texture(texture_name_copy)
+			current_dialog = null
+			dialog.queue_free()
+		
+		var on_delete_texture = func():
+			delete_texture(texture_name_copy)
+			current_dialog = null
+			dialog.queue_free()
+			# Use call_deferred to avoid dialog conflicts
+			call_deferred(\"show_load_dialog\")
+		
+		load_btn.pressed.connect(on_load_texture)
+		delete_btn.pressed.connect(on_delete_texture)
+		
+		# Add separator
+		var separator = HSeparator.new()
+		entry_container.add_child(separator)
+	
+	var close_btn = Button.new()
+	close_btn.text = \"Close\"
+	close_btn.custom_minimum_size.y = 40
+	vbox.add_child(close_btn)
+	
+	var on_close = func():
+		current_dialog = null
+		dialog.queue_free()
+	
+	close_btn.pressed.connect(on_close)
+	dialog.popup_centered()
+
+func delete_texture(texture_name: String):
+	if saved_textures.has(texture_name):
+		saved_textures.erase(texture_name)
+		save_texture_data()
+		show_message(\"Texture '\" + texture_name + \"' deleted!\")
+
+func apply_noise_settings_to_object(target_noise: FastNoiseLite, settings: Dictionary):
+	target_noise.seed = settings.seed
+	target_noise.frequency = settings.frequency
+	target_noise.noise_type = settings.noise_type
+	target_noise.offset = Vector3(settings.offset.x, settings.offset.y, settings.offset.z)
+	target_noise.fractal_type = settings.fractal_type
+	target_noise.fractal_octaves = settings.fractal_octaves
+	target_noise.fractal_lacunarity = settings.fractal_lacunarity
+	target_noise.fractal_gain = settings.fractal_gain
+	target_noise.fractal_weighted_strength = settings.fractal_weighted_strength
+	target_noise.cellular_distance_function = settings.cellular_distance_function
+	target_noise.cellular_return_type = settings.cellular_return_type
+	target_noise.cellular_jitter = settings.cellular_jitter
+
+func load_texture(texture_name: String):
+	if not saved_textures.has(texture_name):
+		show_message(\"Texture not found!\")
+		return
+	
+	var texture_data = saved_textures[texture_name]
+	apply_noise_settings(texture_data.noise_settings)
+	apply_texture_settings(texture_data.texture_settings)
+	
+	# Refresh all controls
+	for child in controls_vbox.get_children():
+		child.queue_free()
+	
+	await get_tree().process_frame
+	create_controls()
+	update_preview()
+	show_message(\"Texture loaded: \" + texture_name)
+
+func apply_noise_settings(settings: Dictionary):
+	apply_noise_settings_to_object(fast_noise, settings)
+
+func apply_texture_settings(settings: Dictionary):
+	noise_texture.width = settings.width
+	noise_texture.height = settings.height
+	noise_texture.seamless = settings.seamless
+	noise_texture.normalize = settings.normalize
+
+func show_message(text: String):
+	if current_dialog:
+		current_dialog.queue_free()
+		current_dialog = null
+	
+	# Wait until the next frame to ensure the old dialog is gone
+	await get_tree().process_frame
+	
+	# Use call_deferred to create the new dialog safely
+	call_deferred(\"_deferred_show_message\", text)
+
+func _deferred_show_message(text: String):
+	# Check if a dialog is already active
+	if current_dialog != null:
+		return
+	
+	var dialog = AcceptDialog.new()
+	dialog.transient = true
+	dialog.dialog_text = text
+	dialog.min_size = Vector2(400, 150)  # Larger message dialog
+	add_child(dialog)
+	current_dialog = dialog
+	dialog.popup_centered()
+	
+	var on_confirmed = func():
+		current_dialog = null
+		dialog.queue_free()
+	dialog.confirmed.connect(on_confirmed)
+"
+
+[node name="NoiseGenerator" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = SubResource("GDScript_cpy3k")

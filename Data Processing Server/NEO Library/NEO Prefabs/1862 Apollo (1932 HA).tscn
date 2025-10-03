@@ -1,0 +1,46 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Shader" path="res://Shaders/NEOShader1.gdshader" id="1_apo5h"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_08bc0"]
+noise_type = 2
+frequency = 0.0030723047
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_gxhpb"]
+noise = SubResource("FastNoiseLite_08bc0")
+seamless = true
+seamless_blend_skirt = 1.0
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_4g6v7"]
+noise = SubResource("FastNoiseLite_08bc0")
+seamless = true
+as_normal_map = true
+seamless_blend_skirt = 1.0
+bump_strength = 32.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_bm8fl"]
+render_priority = 0
+shader = ExtResource("1_apo5h")
+shader_parameter/noise = SubResource("NoiseTexture2D_gxhpb")
+shader_parameter/normal_map = SubResource("NoiseTexture2D_4g6v7")
+shader_parameter/sphere_radius = 0.5720752746318052
+shader_parameter/amplitude = 0.3
+shader_parameter/uv_scale = Vector2(1, 1)
+shader_parameter/mix_color = Color(0.4117647, 0.4117647, 0.4117647, 1)
+shader_parameter/mix_ratio = 0.7
+shader_parameter/axis_scale = Vector3(1, 1, 1.293131)
+shader_parameter/roughtness_value = 1.0
+shader_parameter/world_center = Vector3(0, 0, 0)
+shader_parameter/seam_fix_method = 1
+
+[sub_resource type="BoxMesh" id="BoxMesh_fbfp2"]
+material = SubResource("ShaderMaterial_bm8fl")
+subdivide_width = 100
+subdivide_height = 100
+subdivide_depth = 100
+
+[node name="1862 Apollo (1932 HA)" type="Node3D"]
+
+[node name="1862 Apollo (1932 HA)_Mesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.84003353, 0.5143608, -0.17255919, -0.1378279, -0.10530268, -0.98484254, -0.5247353, 0.85108423, -0.017564513, 0, 0, 0)
+mesh = SubResource("BoxMesh_fbfp2")

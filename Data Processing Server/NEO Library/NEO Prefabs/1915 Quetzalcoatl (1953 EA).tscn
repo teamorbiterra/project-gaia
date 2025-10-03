@@ -1,0 +1,46 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Shader" path="res://Shaders/NEOShader1.gdshader" id="1_1akom"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_yb7sn"]
+noise_type = 2
+frequency = 0.0027718975
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_6r5ns"]
+noise = SubResource("FastNoiseLite_yb7sn")
+seamless = true
+seamless_blend_skirt = 1.0
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_8pugg"]
+noise = SubResource("FastNoiseLite_yb7sn")
+seamless = true
+as_normal_map = true
+seamless_blend_skirt = 1.0
+bump_strength = 32.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_5j8iq"]
+render_priority = 0
+shader = ExtResource("1_1akom")
+shader_parameter/noise = SubResource("NoiseTexture2D_6r5ns")
+shader_parameter/normal_map = SubResource("NoiseTexture2D_8pugg")
+shader_parameter/sphere_radius = 0.5231193395401146
+shader_parameter/amplitude = 0.3
+shader_parameter/uv_scale = Vector2(1, 1)
+shader_parameter/mix_color = Color(0.4117647, 0.4117647, 0.4117647, 1)
+shader_parameter/mix_ratio = 0.7
+shader_parameter/axis_scale = Vector3(1.2409234, 1, 1)
+shader_parameter/roughtness_value = 1.0
+shader_parameter/world_center = Vector3(0, 0, 0)
+shader_parameter/seam_fix_method = 1
+
+[sub_resource type="BoxMesh" id="BoxMesh_iw3oy"]
+material = SubResource("ShaderMaterial_5j8iq")
+subdivide_width = 100
+subdivide_height = 100
+subdivide_depth = 100
+
+[node name="1915 Quetzalcoatl (1953 EA)" type="Node3D"]
+
+[node name="1915 Quetzalcoatl (1953 EA)_Mesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.9771694, -0.12904595, -0.16878149, 0.17375927, 0.9425423, 0.28534502, 0.12226107, -0.30815774, 0.9434464, 0, 0, 0)
+mesh = SubResource("BoxMesh_iw3oy")

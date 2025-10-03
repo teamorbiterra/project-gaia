@@ -1,0 +1,46 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Shader" path="res://Shaders/NEOShader1.gdshader" id="1_6hwen"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_a2x66"]
+noise_type = 2
+frequency = 0.004027281
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_y41x3"]
+noise = SubResource("FastNoiseLite_a2x66")
+seamless = true
+seamless_blend_skirt = 1.0
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_0xdk8"]
+noise = SubResource("FastNoiseLite_a2x66")
+seamless = true
+as_normal_map = true
+seamless_blend_skirt = 1.0
+bump_strength = 32.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_337gt"]
+render_priority = 0
+shader = ExtResource("1_6hwen")
+shader_parameter/noise = SubResource("NoiseTexture2D_y41x3")
+shader_parameter/normal_map = SubResource("NoiseTexture2D_0xdk8")
+shader_parameter/sphere_radius = 0.5580486804355301
+shader_parameter/amplitude = 0.3
+shader_parameter/uv_scale = Vector2(1, 1)
+shader_parameter/mix_color = Color(0.4117647, 0.4117647, 0.4117647, 1)
+shader_parameter/mix_ratio = 0.7
+shader_parameter/axis_scale = Vector3(1, 1, 1.3245276)
+shader_parameter/roughtness_value = 1.0
+shader_parameter/world_center = Vector3(0, 0, 0)
+shader_parameter/seam_fix_method = 1
+
+[sub_resource type="BoxMesh" id="BoxMesh_ypndt"]
+material = SubResource("ShaderMaterial_337gt")
+subdivide_width = 100
+subdivide_height = 100
+subdivide_depth = 100
+
+[node name="1566 Icarus (1949 MA)" type="Node3D"]
+
+[node name="1566 Icarus (1949 MA)_Mesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.17696106, 0.21333763, 0.9608183, 0.7126622, -0.7010825, 0.024410188, 0.6788205, 0.6804192, -0.27610213, 0, 0, 0)
+mesh = SubResource("BoxMesh_ypndt")

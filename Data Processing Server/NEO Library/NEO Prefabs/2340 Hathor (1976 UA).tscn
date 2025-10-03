@@ -1,0 +1,46 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Shader" path="res://Shaders/NEOShader1.gdshader" id="1_k3087"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_dv67j"]
+noise_type = 2
+frequency = 0.0036382126
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_qptm7"]
+noise = SubResource("FastNoiseLite_dv67j")
+seamless = true
+seamless_blend_skirt = 1.0
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_kqqb6"]
+noise = SubResource("FastNoiseLite_dv67j")
+seamless = true
+as_normal_map = true
+seamless_blend_skirt = 1.0
+bump_strength = 32.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_sss2g"]
+render_priority = 0
+shader = ExtResource("1_k3087")
+shader_parameter/noise = SubResource("NoiseTexture2D_qptm7")
+shader_parameter/normal_map = SubResource("NoiseTexture2D_kqqb6")
+shader_parameter/sphere_radius = 0.5072438798266475
+shader_parameter/amplitude = 0.3
+shader_parameter/uv_scale = Vector2(1, 1)
+shader_parameter/mix_color = Color(0.4117647, 0.4117647, 0.4117647, 1)
+shader_parameter/mix_ratio = 0.7
+shader_parameter/axis_scale = Vector3(1, 1, 1.3320198)
+shader_parameter/roughtness_value = 1.0
+shader_parameter/world_center = Vector3(0, 0, 0)
+shader_parameter/seam_fix_method = 1
+
+[sub_resource type="BoxMesh" id="BoxMesh_bn7tq"]
+material = SubResource("ShaderMaterial_sss2g")
+subdivide_width = 100
+subdivide_height = 100
+subdivide_depth = 100
+
+[node name="2340 Hathor (1976 UA)" type="Node3D"]
+
+[node name="2340 Hathor (1976 UA)_Mesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.9884478, -0.1320783, 0.07433953, 0.12930004, 0.9907558, 0.041041695, -0.079073034, -0.030955471, 0.9963881, 0, 0, 0)
+mesh = SubResource("BoxMesh_bn7tq")

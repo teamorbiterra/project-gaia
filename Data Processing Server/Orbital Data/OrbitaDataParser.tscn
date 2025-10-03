@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://brx0jol74mlea"]
+
+[ext_resource type="Script" uid="uid://d1tl1l42bx118" path="res://Data Processing Server/Orbital Data/orbita_data_parser.gd" id="1_cre0x"]
+
+[node name="OrbitaDataParser" type="Node2D"]
+script = ExtResource("1_cre0x")
