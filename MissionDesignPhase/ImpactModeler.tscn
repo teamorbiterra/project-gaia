@@ -1,9 +1,36 @@
-[gd_scene load_steps=2 format=3 uid="uid://cyotjq21pkieh"]
+[gd_scene load_steps=7 format=3 uid="uid://cyotjq21pkieh"]
 
 [ext_resource type="Script" uid="uid://dn0pm2bd2gu1f" path="res://MissionDesignPhase/impact_modeler.gd" id="1_5gmh0"]
+[ext_resource type="Script" uid="uid://dobbjt5hiqqg4" path="res://addons/orbit-controls/orbit-controls.gd" id="2_4kt0p"]
+[ext_resource type="Texture2D" uid="uid://dui4qxbvw1ntd" path="res://HDRI Textures/HDR_blue_nebulae-1.hdr" id="2_jcbdn"]
+
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_88ael"]
+panorama = ExtResource("2_jcbdn")
+
+[sub_resource type="Sky" id="Sky_jp1qr"]
+sky_material = SubResource("PanoramaSkyMaterial_88ael")
+
+[sub_resource type="Environment" id="Environment_i6et0"]
+background_mode = 2
+sky = SubResource("Sky_jp1qr")
 
 [node name="ImpactModeler" type="Node"]
 script = ExtResource("1_5gmh0")
 
 [node name="threeD_container" type="Node3D" parent="."]
 unique_name_in_owner = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="threeD_container"]
+environment = SubResource("Environment_i6et0")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="threeD_container"]
+transform = Transform3D(-0.8660254, -0.43301275, 0.25, -0.22871195, 0.78769225, 0.5720418, -0.44462442, 0.4382247, -0.7811967, 0, 2.3734193, -2.942906)
+shadow_enabled = true
+
+[node name="Camera3D" type="Camera3D" parent="threeD_container"]
+transform = Transform3D(1, 0, 0, 0, 0.9624173, 0.27157483, 0, -0.27157483, 0.9624173, 0, 1.1819103, 6.031168)
+
+[node name="OrbitControls" type="Node3D" parent="threeD_container"]
+script = ExtResource("2_4kt0p")
+_camera = NodePath("../Camera3D")
+metadata/_custom_type_script = "uid://dobbjt5hiqqg4"

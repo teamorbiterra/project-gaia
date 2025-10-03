@@ -1,6 +1,95 @@
-[gd_scene load_steps=2 format=3 uid="uid://ciice4vb1m87h"]
+[gd_scene load_steps=3 format=3 uid="uid://ciice4vb1m87h"]
 
 [ext_resource type="Script" uid="uid://dloff1f7eb6u2" path="res://Entities/Scripts/settings_scene.gd" id="1_ciol7"]
+[ext_resource type="Theme" uid="uid://b3klx57slj0l3" path="res://UIUX/soft_retro.tres" id="2_4il4q"]
 
 [node name="SettingsScene" type="Node"]
 script = ExtResource("1_ciol7")
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_4il4q")
+
+[node name="Panel" type="Panel" parent="Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="Control/Panel"]
+layout_mode = 0
+offset_right = 1920.0
+offset_bottom = 150.0
+theme_override_font_sizes/font_size = 120
+text = "settings"
+horizontal_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/Panel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -332.0
+offset_top = -217.0
+offset_right = 332.0
+offset_bottom = -156.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = -61
+
+[node name="Label" type="Label" parent="Control/Panel/HBoxContainer"]
+layout_mode = 2
+text = "Viewport Size:      "
+
+[node name="screen_size" type="MenuButton" parent="Control/Panel/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 25
+text = "EXCLUSIVE_FULLSCREEN"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="Control/Panel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -334.0
+offset_top = -152.0
+offset_right = 442.0
+offset_bottom = -91.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="Control/Panel/HBoxContainer2"]
+layout_mode = 2
+text = "Background Music Volume:"
+
+[node name="background_music_volume" type="SpinBox" parent="Control/Panel/HBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="close_button" type="Button" parent="Control/Panel"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -272.0
+offset_top = -182.0
+offset_right = -101.0
+offset_bottom = -94.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "CLOSE"

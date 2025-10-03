@@ -177,15 +177,18 @@ func _ready() -> void:
 	
 	previous_button.pressed.connect(
 		func():
+		SoundManager.play_button_press_sound()
 		if file_name_buffer.is_empty(): return
 		current_file = max(0, current_file - 1)
 		load_current_prefab()
 	)
 	next_button.pressed.connect(
 		func():
+		SoundManager.play_button_press_sound()
 		if file_name_buffer.is_empty(): return
 		current_file = min(file_name_buffer.size() - 1, current_file + 1)
 		load_current_prefab()
+
 	)
 	pick_this_button.pressed.connect(
 		func():
@@ -193,11 +196,14 @@ func _ready() -> void:
 		print("NEO Selected:",Globals.active_neo_designation)
 		print("Doing Further Works...")
 		SceneManager.load_composition(SceneManager.Composition.IMPACT_MODELING_COMPOSITION)		
+		SoundManager.play_button_press_sound()
+			
 	)
 	back_button.pressed.connect(
 		func():
 		SceneManager.load_composition(SceneManager.Composition.GAME_MODE_SELECTION)
 		Globals.active_neo_designation=""
+		SoundManager.play_button_press_sound()
 	)
 	
 	

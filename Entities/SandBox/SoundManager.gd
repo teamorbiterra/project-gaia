@@ -5,6 +5,8 @@ enum sounds {
 	NIGHT,
 	SEASHORE,
 	TITLE,
+	BUTTON_PRESS,
+	SINGLE_KEY_PRESS
 }
 
 # Configuration: Set which sounds should be single-instance (music/ambience)
@@ -19,7 +21,9 @@ var SOUND_ARRAY: Dictionary = {
 	sounds.DAY: "res://SFX/day.ogg",
 	sounds.NIGHT: "res://SFX/night.ogg",
 	sounds.SEASHORE: "res://SFX/seashore-60589.mp3",
-	sounds.TITLE: "res://SFX/title.ogg"
+	sounds.TITLE: "res://SFX/title.ogg",
+	sounds.BUTTON_PRESS: "res://SFX/button_press.mp3",
+	sounds.SINGLE_KEY_PRESS:"res://SFX/single_key_press.mp3"
 }
 
 # Single instance players (for music/background)
@@ -32,6 +36,13 @@ var _next_id: int = 0
 # Volume settings
 var _master_volume: float = 1.0
 var _sound_volumes: Dictionary = {}
+
+
+#region templates
+func play_button_press_sound():	
+	play(sounds.BUTTON_PRESS,false,0.5)
+
+
 
 
 func _ready() -> void:

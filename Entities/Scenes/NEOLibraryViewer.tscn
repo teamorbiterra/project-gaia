@@ -15,7 +15,7 @@ sky_material = SubResource("PanoramaSkyMaterial_wkxf0")
 background_mode = 2
 sky = SubResource("Sky_v1vc4")
 
-[node name="OrbitControlExperiment" type="Node"]
+[node name="NEOLibraryViewer" type="Node"]
 script = ExtResource("1_rsevw")
 
 [node name="Control" type="Control" parent="."]

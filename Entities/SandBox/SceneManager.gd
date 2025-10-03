@@ -11,7 +11,8 @@ enum Scene {
 	IDE_SCENE,
 	NEO_LIBRARY_VIEWER,
 	IMPACT_MODELER,
-	CREDIT_SCENE
+	CREDIT_SCENE,
+	SETTINGS_SCENE,
 }
 
 ## Composition enum - add your presets here
@@ -31,7 +32,8 @@ const SCENE_PATHS = {
 	Scene.IDE_SCENE:"res://Entities/SandBox/IDE/IDE.tscn",
 	Scene.NEO_LIBRARY_VIEWER: "res://Entities/Scenes/NEOLibraryViewer.tscn",
 	Scene.IMPACT_MODELER: "res://MissionDesignPhase/ImpactModeler.tscn",
-	Scene.CREDIT_SCENE: "res://Entities/Scenes/CreditScene.tscn"
+	Scene.CREDIT_SCENE: "res://Entities/Scenes/CreditScene.tscn",
+	Scene.SETTINGS_SCENE: "res://Entities/Scenes/SettingsScene.tscn"
 }
 
 
