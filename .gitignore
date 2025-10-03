@@ -2,8 +2,11 @@
 .godot/
 android/
 
+# File to ignore
+icon.png
+
 # Folders to ignore
 demo/
 Experiments/
-NEO\ Tester/
+"NEO Tester"/
 skydemo/
