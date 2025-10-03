@@ -28,7 +28,7 @@ var current_file := 0
 var current_instance: Node3D = null
 
 # ---- helpers for refraction/formatting --------------------------------------
-
+#region formatting NEO information
 const AU_IN_KM := 149597870.7
 
 # Map possible incoming keys → reference keys
@@ -148,10 +148,11 @@ func human_lines(d: Dictionary) -> Array[String]:
 
 	return lines
 
+
+#endregion formating neo info
+
+
 # ---- lifecycle ---------------------------------------------------------------
-@onready var pick_this_button = %pick_this_button
-@onready var prev_button = %prev_button
-@onready var next_buttnon = %next_buttnon
 
 func _ready() -> void:
 	if DESIGNATIONS is JSON and DESIGNATIONS.data is Array:
@@ -161,18 +162,18 @@ func _ready() -> void:
 	if not file_name_buffer.is_empty():
 		load_current_prefab()
 	
-	prev_button.pressed.connect(
-		func():
-		if file_name_buffer.is_empty(): return
-		current_file = max(0, current_file - 1)
-		load_current_prefab()
-	)
-	next_buttnon.pressed.connect(
-		func():
-		if file_name_buffer.is_empty(): return
-		current_file = min(file_name_buffer.size() - 1, current_file + 1)
-		load_current_prefab()
-	)
+	#prev_button.pressed.connect(
+		#func():
+		#if file_name_buffer.is_empty(): return
+		#current_file = max(0, current_file - 1)
+		#load_current_prefab()
+	#)
+	#next_buttnon.pressed.connect(
+		#func():
+		#if file_name_buffer.is_empty(): return
+		#current_file = min(file_name_buffer.size() - 1, current_file + 1)
+		#load_current_prefab()
+	#)
 	
 
 
@@ -185,6 +186,7 @@ func _input(event: InputEvent) -> void:
 
 
 
+#region loading and clearing current prefab
 
 func load_current_prefab() -> void:
 	if current_file < 0 or current_file >= file_name_buffer.size():
@@ -219,3 +221,5 @@ func _clear_prefab_container() -> void:
 	for child in prefab_container.get_children():
 		child.queue_free()
 	current_instance = null
+
+#endregion loading and clearing current prefab

@@ -5,4 +5,5 @@ android/
 # Folders to ignore
 demo/
 Experiments/
-"NEO Tester/"
+NEO\ Tester/
+skydemo/
