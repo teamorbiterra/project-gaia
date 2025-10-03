@@ -1,7 +1,13 @@
 extends Node
 class_name ImpactCalculator
 
+# === PARENT NODE REFERENCE ===
 @onready var impact_modeler = $".."
+
+# === SIGNAL DECLARATION ===
+# Emitted when assessment calculation is complete
+# Connected by parent node (ImpactModeler) to trigger visualization refresh
+signal assessment_complete(assessment_data)
 
 #region Impact Data Structure
 class ImpactAssessment:
@@ -53,26 +59,36 @@ const G = 6.67430e-11  # Gravitational constant
 const TYPICAL_ASTEROID_DENSITY = 2500.0  # kg/m³ (rocky asteroid)
 const OCEAN_COVERAGE = 0.71  # 71% of Earth is ocean
 const TNT_JOULES_PER_MEGATON = 4.184e15  # Joules in 1 megaton TNT
-
-# Torino Scale thresholds (collision probability × kinetic energy)
-const TORINO_THRESHOLDS = [0, 1e-8, 1e-6, 1e-4, 1e-2, 0.01]
-
 #endregion Constants
 
+# === STATE VARIABLES ===
 var current_assessment: ImpactAssessment
 var neo_footprint: Object  # Reference to NEOFootPrint from parent
 
+# === INITIALIZATION ===
 func _ready():
 	print("\n=== Impact Calculator Initialized ===")
 
-# Main function to calculate all impact parameters
+# === MAIN CALCULATION FUNCTION ===
+# Calculates all impact parameters and emits signal when complete
 func calculate_impact_assessment(footprint: Object) -> ImpactAssessment:
+	print("\n" + "=".repeat(60))
+	print("STARTING IMPACT ASSESSMENT CALCULATION")
+	print("=".repeat(60))
+	
+	# Store reference to NEO data
 	neo_footprint = footprint
 	current_assessment = ImpactAssessment.new()
 	
-	print("\n=== Calculating Impact Assessment ===")
+	# Verify footprint data is valid
+	if not neo_footprint:
+		push_error("ImpactCalculator: Received null footprint!")
+		return null
 	
-	# Step 1: Calculate NEO mass
+	# === CALCULATION PIPELINE ===
+	# Each step builds on previous calculations
+	
+	# Step 1: Calculate NEO mass from diameter
 	calculate_neo_mass()
 	
 	# Step 2: Find closest approach to Earth
@@ -84,7 +100,7 @@ func calculate_impact_assessment(footprint: Object) -> ImpactAssessment:
 	# Step 4: Estimate collision probability
 	estimate_collision_probability()
 	
-	# Step 5: Calculate Torino Scale
+	# Step 5: Calculate Torino Scale (hazard rating)
 	calculate_torino_scale()
 	
 	# Step 6: Calculate impact velocity
@@ -99,20 +115,29 @@ func calculate_impact_assessment(footprint: Object) -> ImpactAssessment:
 	calculate_thermal_effects()
 	calculate_seismic_effects()
 	
-	# Step 9: Determine if ocean impact and calculate tsunami
+	# Step 9: Determine impact type and calculate tsunami if ocean impact
 	determine_impact_type()
 	if current_assessment.is_ocean_impact:
 		calculate_tsunami_parameters()
 	
-	# Step 10: Estimate casualties (requires impact location)
+	# Step 10: Estimate casualties
 	estimate_casualties()
 	
+	# Print summary to console
 	print_assessment_summary()
+	
+	print("\n=== Assessment calculation complete ===")
+	
+	# CRITICAL: Emit signal to notify parent that calculation is done
+	# This triggers the canvas to refresh with new data
+	assessment_complete.emit(current_assessment)
+	print("ImpactCalculator: Emitted assessment_complete signal")
 	
 	return current_assessment
 
 #region Mass and Energy Calculations
 
+# Calculate NEO mass from diameter using assumed density
 func calculate_neo_mass():
 	# Volume of sphere: V = (4/3) × π × r³
 	var radius_m = (neo_footprint.diameter_km * 1000.0) / 2.0
@@ -122,8 +147,9 @@ func calculate_neo_mass():
 	current_assessment.neo_mass_kg = volume_m3 * TYPICAL_ASTEROID_DENSITY
 	
 	print("NEO Mass: ", current_assessment.neo_mass_kg, " kg (", 
-		  current_assessment.neo_mass_kg / 1e9, " billion kg)")
+		  snapped(current_assessment.neo_mass_kg / 1e9, 0.01), " billion kg)")
 
+# Calculate impact velocity combining orbital velocity and Earth's escape velocity
 func calculate_impact_velocity():
 	# Impact velocity = sqrt(v_neo² + v_escape²)
 	# where v_escape = sqrt(2 × G × M_earth / R_earth)
@@ -134,34 +160,37 @@ func calculate_impact_velocity():
 	var v_impact_m_s = sqrt(pow(v_neo_m_s, 2) + pow(v_escape_m_s, 2))
 	current_assessment.impact_velocity_km_s = v_impact_m_s / 1000.0
 	
-	print("Impact Velocity: ", current_assessment.impact_velocity_km_s, " km/s")
+	print("Impact Velocity: ", snapped(current_assessment.impact_velocity_km_s, 0.1), " km/s")
 
+# Calculate kinetic energy and TNT equivalent
 func calculate_kinetic_energy():
 	# KE = 0.5 × m × v²
 	var velocity_m_s = current_assessment.impact_velocity_km_s * 1000.0
 	current_assessment.kinetic_energy_joules = 0.5 * current_assessment.neo_mass_kg * pow(velocity_m_s, 2)
 	
-	# Convert to megatons TNT
+	# Convert to megatons TNT for easier comprehension
 	current_assessment.tnt_equivalent_megatons = current_assessment.kinetic_energy_joules / TNT_JOULES_PER_MEGATON
 	
 	print("Kinetic Energy: ", current_assessment.kinetic_energy_joules, " J")
-	print("TNT Equivalent: ", current_assessment.tnt_equivalent_megatons, " megatons")
+	print("TNT Equivalent: ", snapped(current_assessment.tnt_equivalent_megatons, 0.01), " megatons")
 
 #endregion Mass and Energy Calculations
 
 #region Orbital Calculations
 
+# Sample orbit to find closest approach to Earth
 func calculate_closest_approach():
-	# Sample the orbit over one period to find closest approach to Earth
 	var orbital_period_seconds = neo_footprint.orbital_period
-	var num_samples = 1000
+	var num_samples = 1000  # Sample points across one complete orbit
 	var time_step = orbital_period_seconds / num_samples
 	
 	var min_distance = INF
 	var closest_time = 0.0
 	
+	# Earth's position (simplified: circular orbit at 1 AU)
 	var earth_position = Vector3(impact_modeler.EARTH_DISTANCE_KM, 0, 0)
 	
+	# Sample NEO position throughout its orbit
 	for i in range(num_samples):
 		var time = neo_footprint.epoch_tdb + (i * time_step)
 		var neo_pos = neo_footprint.get_position_at_time(time)
@@ -174,54 +203,59 @@ func calculate_closest_approach():
 	current_assessment.closest_approach_distance_km = min_distance
 	current_assessment.closest_approach_date = closest_time
 	
-	print("Closest Approach Distance: ", min_distance, " km")
-	print("Closest Approach Date: ", closest_time / 86400.0, " days from epoch")
+	print("Closest Approach Distance: ", snapped(min_distance, 0.1), " km")
+	print("Closest Approach Date: ", snapped(closest_time / 86400.0, 0.1), " days from epoch")
 
+# Calculate Minimum Orbit Intersection Distance
 func calculate_moid():
 	# Simplified MOID calculation
 	# MOID is the minimum distance between two orbital paths
-	# For simplicity, we'll use the perihelion distance comparison
 	
 	var neo_perihelion = neo_footprint.perihelion_distance
 	var neo_aphelion = neo_footprint.aphelion_distance
 	var earth_orbit_radius = impact_modeler.EARTH_DISTANCE_KM
 	
-	# Check if orbits intersect
+	# Check if orbits intersect Earth's orbital distance
 	if neo_perihelion < earth_orbit_radius and neo_aphelion > earth_orbit_radius:
-		# Orbits cross Earth's orbital distance
+		# Orbits cross Earth's orbital distance - potentially hazardous
 		current_assessment.moid_km = abs(current_assessment.closest_approach_distance_km - EARTH_RADIUS_KM)
 	else:
+		# Orbits don't cross - find minimum distance between orbit ranges
 		current_assessment.moid_km = min(
 			abs(neo_perihelion - earth_orbit_radius),
 			abs(neo_aphelion - earth_orbit_radius)
 		)
 	
-	print("MOID (Minimum Orbit Intersection Distance): ", current_assessment.moid_km, " km")
+	print("MOID (Minimum Orbit Intersection Distance): ", snapped(current_assessment.moid_km, 0.1), " km")
 
+# Estimate collision probability based on MOID and uncertainties
 func estimate_collision_probability():
-	# Simplified collision probability based on MOID and orbital parameters
-	# Real calculation requires uncertainty ellipsoids
+	# Simplified collision probability
+	# Real calculations require detailed uncertainty ellipsoids
 	
 	var cross_section = PI * pow(EARTH_RADIUS_KM, 2)
-	var orbital_uncertainty = 1000.0  # Assumed 1000 km uncertainty
+	var orbital_uncertainty = 1000.0  # Assumed 1000 km uncertainty in trajectory
 	
 	if current_assessment.moid_km < EARTH_RADIUS_KM + orbital_uncertainty:
-		# Potentially hazardous
+		# Potentially hazardous - within uncertainty range
 		var proximity_factor = 1.0 - (current_assessment.moid_km / (EARTH_RADIUS_KM + orbital_uncertainty))
 		current_assessment.collision_probability = proximity_factor * 0.001  # Scale to reasonable probability
 	else:
+		# Outside uncertainty range - no collision risk
 		current_assessment.collision_probability = 0.0
 	
-	# Clamp to [0, 1]
+	# Ensure probability is between 0 and 1
 	current_assessment.collision_probability = clamp(current_assessment.collision_probability, 0.0, 1.0)
 	
-	print("Collision Probability: ", current_assessment.collision_probability * 100, "%")
+	print("Collision Probability: ", snapped(current_assessment.collision_probability * 100, 0.001), "%")
 
+# Calculate Torino Scale (0-10 hazard rating)
 func calculate_torino_scale():
-	# Torino Scale: 0-10 based on collision probability and impact energy
+	# Torino Scale combines collision probability and impact energy
 	var energy_factor = current_assessment.tnt_equivalent_megatons
 	var prob = current_assessment.collision_probability
 	
+	# Scale determination based on NASA Torino Scale criteria
 	if prob == 0 or energy_factor < 1:
 		current_assessment.torino_scale = 0  # No hazard
 	elif prob < 1e-8:
@@ -247,77 +281,87 @@ func calculate_torino_scale():
 	else:
 		current_assessment.torino_scale = 10  # Certain collision - global catastrophe
 	
-	print("Torino Scale: ", current_assessment.torino_scale, " / 10")
+	print("Torino Scale: ", current_assessment.torino_scale, " / 10 (", get_risk_level_description(), ")")
 
 #endregion Orbital Calculations
 
 #region Impact Effects Calculations
 
+# Calculate crater dimensions using scaling laws
 func calculate_crater_parameters():
 	# Empirical crater scaling laws
-	# D = C × (E/ρ)^0.22 where D is diameter, E is energy, ρ is target density
+	# Based on impact energy and target material properties
 	
-	var target_density = 2500.0  # kg/m³ (rock)
 	var energy_megatons = current_assessment.tnt_equivalent_megatons
 	
-	# Convert to joules for calculation
-	var energy_joules = energy_megatons * TNT_JOULES_PER_MEGATON
-	
-	# Crater diameter (simplified formula)
+	# Crater diameter (simplified Schmidt-Holsapple formula)
+	# D ≈ C × E^0.3 where C is a constant
 	current_assessment.crater_diameter_km = 0.0013 * pow(energy_megatons, 0.3)
 	
-	# Crater depth (typically 1/10 to 1/5 of diameter)
+	# Crater depth (typically 1/10 to 1/5 of diameter for complex craters)
 	current_assessment.crater_depth_km = current_assessment.crater_diameter_km * 0.15
 	
-	print("Crater Diameter: ", current_assessment.crater_diameter_km, " km")
-	print("Crater Depth: ", current_assessment.crater_depth_km, " km")
+	print("Crater Diameter: ", snapped(current_assessment.crater_diameter_km, 0.01), " km")
+	print("Crater Depth: ", snapped(current_assessment.crater_depth_km, 0.01), " km")
 
+# Calculate air blast damage zones
 func calculate_air_blast_effects():
-	# Air blast radius based on overpressure
+	# Air blast radius based on overpressure levels
 	# Total destruction: 20 psi overpressure
 	# Severe damage: 5 psi
 	# Moderate damage: 1 psi
 	
 	var energy_kt = current_assessment.tnt_equivalent_megatons * 1000  # Convert to kilotons
 	
-	# Scaling from nuclear weapon effects
+	# Scaling from nuclear weapon effects research
 	current_assessment.total_destruction_radius_km = 0.3 * pow(energy_kt, 0.33)
 	current_assessment.severe_damage_radius_km = 0.6 * pow(energy_kt, 0.33)
 	current_assessment.moderate_damage_radius_km = 1.2 * pow(energy_kt, 0.33)
 	current_assessment.air_blast_radius_km = current_assessment.moderate_damage_radius_km
 	
-	print("Air Blast Radius (moderate damage): ", current_assessment.air_blast_radius_km, " km")
+	print("Air Blast Radius (moderate damage): ", snapped(current_assessment.air_blast_radius_km, 0.1), " km")
+	print("Total Destruction Radius: ", snapped(current_assessment.total_destruction_radius_km, 0.1), " km")
+	print("Severe Damage Radius: ", snapped(current_assessment.severe_damage_radius_km, 0.1), " km")
 
+# Calculate thermal radiation effects
 func calculate_thermal_effects():
-	# Thermal radiation radius (3rd degree burns)
+	# Thermal radiation radius (3rd degree burns threshold)
 	var energy_kt = current_assessment.tnt_equivalent_megatons * 1000
 	
+	# Fireball and thermal radiation scaling
 	current_assessment.thermal_radiation_radius_km = 0.8 * pow(energy_kt, 0.41)
 	current_assessment.fireball_radius_km = 0.1 * pow(energy_kt, 0.4)
 	
-	print("Thermal Radiation Radius: ", current_assessment.thermal_radiation_radius_km, " km")
-	print("Fireball Radius: ", current_assessment.fireball_radius_km, " km")
+	print("Thermal Radiation Radius: ", snapped(current_assessment.thermal_radiation_radius_km, 0.1), " km")
+	print("Fireball Radius: ", snapped(current_assessment.fireball_radius_km, 0.1), " km")
 
+# Calculate seismic effects
 func calculate_seismic_effects():
 	# Seismic magnitude from impact energy
-	# M = 0.67 × log10(E) - 5.87 (where E is in joules)
+	# Formula: M = 0.67 × log10(E) - 5.87 (where E is in joules)
 	
 	var energy_joules = current_assessment.kinetic_energy_joules
-	current_assessment.seismic_magnitude = 0.67 * log(energy_joules) / log(10) - 5.87
 	
-	print("Seismic Magnitude: ", current_assessment.seismic_magnitude, " (Richter scale)")
+	# Prevent log of zero or negative
+	if energy_joules > 0:
+		current_assessment.seismic_magnitude = 0.67 * log(energy_joules) / log(10) - 5.87
+	else:
+		current_assessment.seismic_magnitude = 0.0
+	
+	print("Seismic Magnitude: ", snapped(current_assessment.seismic_magnitude, 0.1), " (Richter scale)")
 
 #endregion Impact Effects Calculations
 
 #region Tsunami Calculations
 
+# Determine if impact occurs in ocean or on land
 func determine_impact_type():
-	# 71% chance of ocean impact
+	# 71% of Earth's surface is ocean
 	current_assessment.is_ocean_impact = randf() < OCEAN_COVERAGE
 	
-	# For simulation, you could also check impact location coordinates
 	print("Impact Type: ", "Ocean" if current_assessment.is_ocean_impact else "Land")
 
+# Calculate tsunami parameters for ocean impacts
 func calculate_tsunami_parameters():
 	# Simplified tsunami calculation for deep water impacts
 	
@@ -326,30 +370,33 @@ func calculate_tsunami_parameters():
 	
 	# Initial wave amplitude (meters) - empirical formula
 	var wave_amplitude = 0.1 * pow(energy_megatons, 0.5)
-	current_assessment.tsunami_wave_height_m = wave_amplitude * 10  # Amplification near coast
+	
+	# Wave amplification near coast (typically 10x)
+	current_assessment.tsunami_wave_height_m = wave_amplitude * 10
 	
 	# Inundation distance (how far inland)
-	# Depends on coastal slope, but rough estimate
+	# Depends on coastal slope and wave height
 	current_assessment.tsunami_inundation_distance_km = wave_amplitude * 0.5
 	
-	# Affected coastline (circular propagation)
+	# Affected coastline (circular propagation from impact point)
 	var max_travel_distance_km = 10000.0  # Tsunamis can travel across oceans
-	current_assessment.affected_coastline_km = 2 * PI * max_travel_distance_km * 0.3  # 30% of circumference
+	current_assessment.affected_coastline_km = 2 * PI * max_travel_distance_km * 0.3  # 30% of circumference affected
 	
 	print("\n=== Tsunami Parameters ===")
-	print("Wave Height at Coast: ", current_assessment.tsunami_wave_height_m, " meters")
-	print("Inundation Distance: ", current_assessment.tsunami_inundation_distance_km, " km inland")
-	print("Affected Coastline: ", current_assessment.affected_coastline_km, " km")
+	print("Wave Height at Coast: ", snapped(current_assessment.tsunami_wave_height_m, 0.1), " meters")
+	print("Inundation Distance: ", snapped(current_assessment.tsunami_inundation_distance_km, 0.1), " km inland")
+	print("Affected Coastline: ", snapped(current_assessment.affected_coastline_km, 0.1), " km")
 
 #endregion Tsunami Calculations
 
 #region Casualty Estimation
 
+# Estimate human casualties based on affected areas
 func estimate_casualties():
 	# Simplified casualty estimation
-	# Real calculation would require population density maps
+	# Real calculations require detailed population density maps
 	
-	# Random impact location (for simulation)
+	# Generate random impact location for simulation
 	current_assessment.impact_location = Vector2(
 		randf_range(-90, 90),  # Latitude
 		randf_range(-180, 180)  # Longitude
@@ -367,24 +414,28 @@ func estimate_casualties():
 		var affected_coastal_area = current_assessment.affected_coastline_km * current_assessment.tsunami_inundation_distance_km
 		current_assessment.population_in_blast_radius = int(affected_coastal_area * coastal_population_density)
 	else:
-		# Land impact casualties
+		# Land impact casualties from blast
 		current_assessment.population_in_blast_radius = int(blast_area * avg_population_density)
 	
-	# Casualty rates by zone
+	# Casualty rates by damage zone
 	var total_destruction_area = PI * pow(current_assessment.total_destruction_radius_km, 2)
 	var severe_damage_area = PI * pow(current_assessment.severe_damage_radius_km, 2) - total_destruction_area
 	
-	var immediate_casualties = int(total_destruction_area * avg_population_density * 0.9)  # 90% fatality
-	immediate_casualties += int(severe_damage_area * avg_population_density * 0.5)  # 50% fatality
+	# Fatality rates: 90% in total destruction zone, 50% in severe damage zone
+	var immediate_casualties = int(total_destruction_area * avg_population_density * 0.9)
+	immediate_casualties += int(severe_damage_area * avg_population_density * 0.5)
 	
 	current_assessment.estimated_immediate_casualties = immediate_casualties
-	current_assessment.estimated_total_casualties = int(immediate_casualties * 1.5)  # Include delayed casualties
 	
-	# Affected countries (simplified)
-	current_assessment.affected_countries = ["Country A", "Country B"]  # Placeholder
+	# Include delayed casualties (injuries, infrastructure collapse, etc.)
+	current_assessment.estimated_total_casualties = int(immediate_casualties * 1.5)
+	
+	# Affected countries (placeholder - would require geospatial analysis)
+	current_assessment.affected_countries = ["Multiple regions"]
 	
 	print("\n=== Casualty Estimates ===")
-	print("Impact Location: ", current_assessment.impact_location)
+	print("Impact Location: Lat ", snapped(current_assessment.impact_location.x, 0.1), 
+		  ", Lon ", snapped(current_assessment.impact_location.y, 0.1))
 	print("Population in Affected Area: ", current_assessment.population_in_blast_radius)
 	print("Immediate Casualties: ", current_assessment.estimated_immediate_casualties)
 	print("Total Casualties (est.): ", current_assessment.estimated_total_casualties)
@@ -393,32 +444,33 @@ func estimate_casualties():
 
 #region Reporting
 
+# Print comprehensive assessment summary to console
 func print_assessment_summary():
 	print("\n" + "=".repeat(60))
 	print("IMPACT ASSESSMENT SUMMARY")
 	print("=".repeat(60))
 	
 	print("\nORBITAL RISK:")
-	print("  MOID: ", current_assessment.moid_km, " km")
-	print("  Closest Approach: ", current_assessment.closest_approach_distance_km, " km")
-	print("  Collision Probability: ", current_assessment.collision_probability * 100, "%")
-	print("  Torino Scale: ", current_assessment.torino_scale, " / 10")
+	print("  MOID: ", snapped(current_assessment.moid_km, 0.1), " km")
+	print("  Closest Approach: ", snapped(current_assessment.closest_approach_distance_km, 0.1), " km")
+	print("  Collision Probability: ", snapped(current_assessment.collision_probability * 100, 0.001), "%")
+	print("  Torino Scale: ", current_assessment.torino_scale, " / 10 (", get_risk_level_description(), ")")
 	
 	print("\nIMPACT ENERGY:")
-	print("  NEO Mass: ", current_assessment.neo_mass_kg / 1e12, " trillion kg")
-	print("  Impact Velocity: ", current_assessment.impact_velocity_km_s, " km/s")
-	print("  TNT Equivalent: ", current_assessment.tnt_equivalent_megatons, " megatons")
+	print("  NEO Mass: ", snapped(current_assessment.neo_mass_kg / 1e12, 0.01), " trillion kg")
+	print("  Impact Velocity: ", snapped(current_assessment.impact_velocity_km_s, 0.1), " km/s")
+	print("  TNT Equivalent: ", snapped(current_assessment.tnt_equivalent_megatons, 0.01), " megatons")
 	
 	print("\nIMPACT EFFECTS:")
-	print("  Crater Diameter: ", current_assessment.crater_diameter_km, " km")
-	print("  Seismic Magnitude: ", current_assessment.seismic_magnitude)
-	print("  Air Blast Radius: ", current_assessment.air_blast_radius_km, " km")
-	print("  Thermal Radius: ", current_assessment.thermal_radiation_radius_km, " km")
+	print("  Crater Diameter: ", snapped(current_assessment.crater_diameter_km, 0.01), " km")
+	print("  Seismic Magnitude: ", snapped(current_assessment.seismic_magnitude, 0.1))
+	print("  Air Blast Radius: ", snapped(current_assessment.air_blast_radius_km, 0.1), " km")
+	print("  Thermal Radius: ", snapped(current_assessment.thermal_radiation_radius_km, 0.1), " km")
 	
 	if current_assessment.is_ocean_impact:
 		print("\nTSUNAMI EFFECTS:")
-		print("  Wave Height: ", current_assessment.tsunami_wave_height_m, " meters")
-		print("  Inundation Distance: ", current_assessment.tsunami_inundation_distance_km, " km")
+		print("  Wave Height: ", snapped(current_assessment.tsunami_wave_height_m, 0.1), " meters")
+		print("  Inundation Distance: ", snapped(current_assessment.tsunami_inundation_distance_km, 0.1), " km")
 	
 	print("\nCAUSUALTY ESTIMATES:")
 	print("  Immediate Casualties: ", current_assessment.estimated_immediate_casualties)
@@ -426,6 +478,7 @@ func print_assessment_summary():
 	
 	print("=".repeat(60) + "\n")
 
+# Get text description of Torino Scale level
 func get_risk_level_description() -> String:
 	match current_assessment.torino_scale:
 		0: return "No Hazard"
@@ -443,11 +496,13 @@ func get_risk_level_description() -> String:
 
 #endregion Reporting
 
-# Public function to get current assessment
+# === PUBLIC API ===
+
+# Get current assessment (called by parent or other nodes)
 func get_assessment() -> ImpactAssessment:
 	return current_assessment
 
-# Save assessment to file
+# Save assessment to JSON file
 func save_assessment_to_file(filepath: String):
 	var file = FileAccess.open(filepath, FileAccess.WRITE)
 	if file:
@@ -464,3 +519,5 @@ func save_assessment_to_file(filepath: String):
 		file.store_string(JSON.stringify(data, "\t"))
 		file.close()
 		print("Assessment saved to: ", filepath)
+	else:
+		push_error("Failed to save assessment to: ", filepath)

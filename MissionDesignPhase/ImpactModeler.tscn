@@ -1,9 +1,10 @@
-[gd_scene load_steps=8 format=3 uid="uid://cyotjq21pkieh"]
+[gd_scene load_steps=9 format=3 uid="uid://cyotjq21pkieh"]
 
 [ext_resource type="Script" uid="uid://dn0pm2bd2gu1f" path="res://MissionDesignPhase/impact_modeler.gd" id="1_5gmh0"]
 [ext_resource type="Script" uid="uid://dobbjt5hiqqg4" path="res://addons/orbit-controls/orbit-controls.gd" id="2_4kt0p"]
 [ext_resource type="Texture2D" uid="uid://dui4qxbvw1ntd" path="res://HDRI Textures/HDR_blue_nebulae-1.hdr" id="2_jcbdn"]
 [ext_resource type="Script" uid="uid://bb4n6qjrt3eg7" path="res://MissionDesignPhase/impact_calculator.gd" id="4_88ael"]
+[ext_resource type="Script" uid="uid://df20e3vk8vsbe" path="res://MissionDesignPhase/drawing_canvas.gd" id="5_jp1qr"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_88ael"]
 panorama = ExtResource("2_jcbdn")
@@ -37,4 +38,15 @@ _camera = NodePath("../Camera3D")
 metadata/_custom_type_script = "uid://dobbjt5hiqqg4"
 
 [node name="Impact_Calculator" type="Node" parent="."]
+unique_name_in_owner = true
 script = ExtResource("4_88ael")
+
+[node name="Window" type="Window" parent="."]
+oversampling_override = 1.0
+title = "Impact Assesment"
+position = Vector2i(0, 36)
+size = Vector2i(700, 700)
+
+[node name="drawing_canvas" type="Node2D" parent="Window"]
+unique_name_in_owner = true
+script = ExtResource("5_jp1qr")

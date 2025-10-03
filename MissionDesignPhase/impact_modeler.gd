@@ -1,7 +1,10 @@
 extends SceneBase
 class_name ImpactModeler
 
-
+# === CHILD NODE REFERENCES ===
+# These nodes must have unique names (%) set in the editor
+@onready var impact_calculator = %Impact_Calculator
+@onready var canvas = %drawing_canvas
 @onready var three_d_container = %threeD_container
 
 #region reference 
@@ -152,58 +155,97 @@ class NEOFootPrint:
 
 #endregion NEOFootPrintClass
 
+# === CONSTANTS ===
 const NEODB = preload("res://Data Processing Server/Externals/neodb.json")
 
-func _ready():
-	if is_node_ready():
-		if Globals.active_neo_designation != "":
-			print("just get an active neo!")
-			print(Globals.active_neo_designation)
-		load_neo()
-
+# === NEO PREFAB AND VISUALIZATION ===
 var prefab_path = "res://Data Processing Server/NEO Library/NEO Prefabs/"
 var current_neo: Node3D
 var current_neo_footprint: NEOFootPrint
+
+# === ORBITAL SIMULATION ===
 var simulation_time: float = 0.0
 var time_scale: float = 86400.0  # Seconds per frame (1 day per frame default)
 var orbit_scale: float = 5.0  # Godot units radius
 var max_distance_km: float = 0.0  # Will be set to aphelion distance
 
-# Trajectory visualization
+# === TRAJECTORY VISUALIZATION ===
 var trajectory_mesh: MeshInstance3D
 var earth_sphere: MeshInstance3D
 const EARTH_DISTANCE_KM = 149597870.7  # 1 AU in km (Earth's distance from Sun)
 const EARTH_DIAMETER_KM = 12742.0  # Earth's diameter in km
 
+# === INITIALIZATION ===
+func _ready():
+	# Verify child nodes are properly referenced
+	if not impact_calculator:
+		push_error("ImpactModeler: Impact_Calculator node not found! Make sure it has unique name (%) enabled.")
+		return
+	
+	if not canvas:
+		push_error("ImpactModeler: drawing_canvas node not found! Make sure it has unique name (%) enabled.")
+		return
+	
+	# Connect to impact calculator's completion signal
+	# This ensures we only refresh the canvas after calculations are done
+	if impact_calculator.has_signal("assessment_complete"):
+		impact_calculator.assessment_complete.connect(_on_assessment_complete)
+		print("ImpactModeler: Connected to assessment_complete signal")
+	else:
+		push_error("ImpactModeler: assessment_complete signal not found in ImpactCalculator!")
+	
+	# Load NEO data if available
+	if is_node_ready():
+		if Globals.active_neo_designation != "":
+			print("ImpactModeler: Loading active NEO: ", Globals.active_neo_designation)
+			load_neo()
+		else:
+			print("ImpactModeler: No active NEO designation set in Globals")
+
+# === NEO LOADING ===
 func load_neo():
+	print("\n=== Loading NEO ===")
+	
+	# Step 1: Instantiate the NEO 3D model
 	var neo_scene: PackedScene = load(prefab_path + Globals.active_neo_designation + ".tscn")
-	if neo_scene.can_instantiate():
-		print("neo scene can instantiate")
+	if neo_scene and neo_scene.can_instantiate():
+		print("ImpactModeler: NEO scene loaded successfully")
 		current_neo = neo_scene.instantiate()
 		add_child(current_neo)
 	else:
-		print("neo scene can not be instantiate")
+		push_error("ImpactModeler: Failed to load NEO scene: ", prefab_path + Globals.active_neo_designation + ".tscn")
+		return
 	
-	if is_instance_valid(current_neo):
-		print("NEO loaded")
+	if not is_instance_valid(current_neo):
+		push_error("ImpactModeler: NEO instance is invalid")
+		return
 	
-	# Load the data and build a footprint
+	print("ImpactModeler: NEO 3D model instantiated")
+	
+	# Step 2: Load NEO data from database and create footprint
 	var data = NEODB.data
+	var neo_found = false
+	
 	for obj in data.get("objects"):
 		if obj is Dictionary:
 			if obj.get("designation") == Globals.active_neo_designation:
+				neo_found = true
+				print("ImpactModeler: Found NEO data in database")
+				
+				# Create footprint and populate with database values
 				current_neo_footprint = NEOFootPrint.new()
 				for key in key_ref:
-					current_neo_footprint.set(key, obj.get(key))
-					current_neo.set_meta(key, obj.get(key, null))
+					var value = obj.get(key)
+					current_neo_footprint.set(key, value)
+					current_neo.set_meta(key, value)
 				
-				# Calculate orbital parameters
+				# Calculate derived orbital parameters
 				current_neo_footprint.calculate_perihelion()
 				current_neo_footprint.calculate_aphelion()
 				current_neo_footprint.calculate_orbital_period()
 				current_neo_footprint.calculate_orbital_velocity()
 				
-				# Set max distance for scaling
+				# Set max distance for proper scaling
 				max_distance_km = current_neo_footprint.aphelion_distance
 				
 				# Initialize simulation time to epoch
@@ -211,55 +253,102 @@ func load_neo():
 				
 				break
 	
+	if not neo_found:
+		push_error("ImpactModeler: NEO designation not found in database: ", Globals.active_neo_designation)
+		return
+	
+	# Step 3: Display footprint information
 	show_neo_foot_print()
+	
+	# Step 4: Create visual elements (trajectory and Earth)
 	create_trajectory_visualization()
 	create_earth_sphere()
+	
+	# Step 5: Start impact calculation (will trigger signal when complete)
+	print("ImpactModeler: Starting impact assessment calculation...")
+	impact_calculator.calculate_impact_assessment(current_neo_footprint)
+	
+	# Note: Canvas refresh will happen automatically via signal when calculation completes
 
+# === SIGNAL HANDLER ===
+# Called when impact calculator finishes its assessment
+func _on_assessment_complete(assessment):
+	print("\n=== Impact Assessment Complete ===")
+	print("ImpactModeler: Received assessment completion signal")
+	
+	# Verify assessment is valid
+	if not assessment:
+		push_error("ImpactModeler: Received null assessment!")
+		return
+	
+	print("ImpactModeler: Assessment valid, requesting canvas refresh...")
+	
+	# Trigger canvas to redraw with new data
+	if canvas and canvas.has_method("refresh_visualization"):
+		canvas.refresh_visualization()
+	else:
+		push_error("ImpactModeler: Canvas or refresh_visualization method not available!")
+
+# === DEBUG OUTPUT ===
 func show_neo_foot_print():
 	print("\n=== NEO Footprint ===")
 	for key in key_ref:
-		print(key, ": ", current_neo_footprint.get(key))
+		print("  ", key, ": ", current_neo_footprint.get(key))
 	
 	print("\n=== Calculated Parameters ===")
 	var calc_params = current_neo_footprint.get_calculated_parameters()
 	for key in calc_params:
-		print(key, ": ", calc_params[key])
+		print("  ", key, ": ", calc_params[key])
 
+# === ORBITAL SIMULATION ===
 func _process(delta):
-	if current_neo_footprint and is_instance_valid(current_neo):
-		# Advance simulation time
-		simulation_time += delta * time_scale
-		
-		# Get position at current simulation time
-		var pos_km = current_neo_footprint.get_position_at_time(simulation_time)
-		
-		# Scale to Godot units (clamp to 5 unit radius)
-		var scaled_pos = scale_to_godot_units(pos_km)
-		
-		# Update NEO position
-		current_neo.global_position = scaled_pos
-		
-		# Optional: Print debug info every second
-		var time_elapsed = simulation_time - current_neo_footprint.epoch_tdb
-		if int(time_elapsed) % int(time_scale) == 0 and Engine.get_frames_drawn() % 60 == 0:
-			print("Time: ", time_elapsed / 86400.0, " days | Pos: ", scaled_pos)
+	# Only update if we have valid NEO data
+	if not current_neo_footprint or not is_instance_valid(current_neo):
+		return
+	
+	# Advance simulation time
+	simulation_time += delta * time_scale
+	
+	# Get position at current simulation time
+	var pos_km = current_neo_footprint.get_position_at_time(simulation_time)
+	
+	# Scale to Godot units (normalized to orbit_scale radius)
+	var scaled_pos = scale_to_godot_units(pos_km)
+	
+	# Update NEO position in 3D space
+	current_neo.global_position = scaled_pos
+	
+	# Debug output (every second of real time)
+	var time_elapsed = simulation_time - current_neo_footprint.epoch_tdb
+	if int(time_elapsed) % int(time_scale) == 0 and Engine.get_frames_drawn() % 60 == 0:
+		print("Simulation - Days: ", snapped(time_elapsed / 86400.0, 0.1), " | Position: ", scaled_pos)
 
-# Scale real-world km coordinates to Godot 5-unit radius
+# === COORDINATE SCALING ===
+# Converts real-world km coordinates to Godot units
+# Maps the aphelion distance to orbit_scale (default 5 units)
 func scale_to_godot_units(pos_km: Vector3) -> Vector3:
-	# Scale factor: 5 Godot units = max_distance_km
 	var scale_factor = orbit_scale / max_distance_km
 	return pos_km * scale_factor
 
-# Optional: Function to set time scale (for fast-forwarding)
+# === TIME CONTROL ===
+# Set simulation speed (days per second of real time)
 func set_time_scale(days_per_second: float):
 	time_scale = days_per_second * 86400.0  # Convert days to seconds
+	print("ImpactModeler: Time scale set to ", days_per_second, " days/second")
 
-# Optional: Reset simulation to epoch
+# Reset simulation to epoch time
 func reset_simulation():
-	simulation_time = current_neo_footprint.epoch_tdb
+	if current_neo_footprint:
+		simulation_time = current_neo_footprint.epoch_tdb
+		print("ImpactModeler: Simulation reset to epoch")
 
-# Create trajectory visualization using ImmediateMesh
+# === TRAJECTORY VISUALIZATION ===
+# Creates a visual representation of the complete orbital path
 func create_trajectory_visualization():
+	if not current_neo_footprint:
+		push_error("ImpactModeler: Cannot create trajectory - no footprint data")
+		return
+	
 	var imesh = ImmediateMesh.new()
 	trajectory_mesh = MeshInstance3D.new()
 	trajectory_mesh.mesh = imesh
@@ -272,11 +361,12 @@ func create_trajectory_visualization():
 	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	trajectory_mesh.material_override = material
 	
-	# Calculate one complete orbit (sample points)
+	# Calculate one complete orbit by sampling points
 	var num_points = 360  # One point per degree
 	var orbital_period_seconds = current_neo_footprint.orbital_period
 	var time_step = orbital_period_seconds / num_points
 	
+	# Build the line strip
 	imesh.surface_begin(Mesh.PRIMITIVE_LINE_STRIP)
 	
 	for i in range(num_points + 1):  # +1 to close the loop
@@ -288,19 +378,20 @@ func create_trajectory_visualization():
 	
 	imesh.surface_end()
 	
-	print("Trajectory visualization created with ", num_points, " points")
+	print("ImpactModeler: Trajectory visualization created with ", num_points, " points")
 
-# Create Earth sphere at correct orbital position
+# === EARTH VISUALIZATION ===
+# Creates a sphere representing Earth at 1 AU from the Sun
 func create_earth_sphere():
 	earth_sphere = MeshInstance3D.new()
 	add_child(earth_sphere)
 	
-	# Calculate Earth's mesh size using the same remapping as NEOs
-	# Clamp Earth's diameter to the max range since it's much larger than asteroids
+	# Calculate Earth's visual size using the same remapping as NEOs
+	# This ensures consistent scale across all objects
 	var clamped_diameter = clamp(EARTH_DIAMETER_KM, 0.1, 35.0)
 	var earth_mesh_size = remap(clamped_diameter, 0.1, 35.0, 0.5, 1.5)
 	
-	# Create sphere mesh with calculated size
+	# Create sphere mesh
 	var sphere = SphereMesh.new()
 	sphere.radius = earth_mesh_size / 2.0  # radius is half of diameter
 	sphere.height = earth_mesh_size  # height is the full diameter
@@ -313,13 +404,12 @@ func create_earth_sphere():
 	material.roughness = 0.7
 	earth_sphere.material_override = material
 	
-	# Calculate Earth's position (assuming circular orbit at 1 AU)
-	# Earth is at approximately (1 AU, 0, 0) in heliocentric coordinates
+	# Position Earth at 1 AU (assuming circular orbit for simplicity)
 	var earth_pos_km = Vector3(EARTH_DISTANCE_KM, 0, 0)
 	var earth_scaled_pos = scale_to_godot_units(earth_pos_km)
 	earth_sphere.global_position = earth_scaled_pos
 	
-	print("Earth placed at: ", earth_scaled_pos, " (Godot units)")
-	print("Earth distance: ", EARTH_DISTANCE_KM, " km (1 AU)")
-	print("Earth diameter: ", EARTH_DIAMETER_KM, " km (clamped to ", clamped_diameter, " km for mesh)")
-	print("Earth mesh size: ", earth_mesh_size, " Godot units")
+	print("ImpactModeler: Earth sphere created")
+	print("  Position: ", earth_scaled_pos, " (Godot units)")
+	print("  Distance: ", EARTH_DISTANCE_KM, " km (1 AU)")
+	print("  Visual size: ", earth_mesh_size, " Godot units")
