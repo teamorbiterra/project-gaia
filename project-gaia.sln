@@ -1,6 +1,6 @@
 ﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "communication-tools", "communication-tools.csproj", "{E6B4058B-2EA3-4824-880E-FC55C95B0529}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "project-gaia", "project-gaia.csproj", "{E6B4058B-2EA3-4824-880E-FC55C95B0529}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
