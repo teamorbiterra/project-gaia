@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://ciice4vb1m87h"]
+
+[ext_resource type="Script" uid="uid://dloff1f7eb6u2" path="res://Entities/Scripts/settings_scene.gd" id="1_ciol7"]
+
+[node name="SettingsScene" type="Node"]
+script = ExtResource("1_ciol7")

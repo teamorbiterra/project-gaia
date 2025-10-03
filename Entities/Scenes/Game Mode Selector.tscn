@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://hupaolatm8pa"]
 
 [ext_resource type="Theme" uid="uid://b3klx57slj0l3" path="res://UIUX/soft_retro.tres" id="1_ce71r"]
-[ext_resource type="Script" uid="uid://gvlc33nxy2ls" path="res://Entities/Scenes/game_mode_selector.gd" id="1_j3bn5"]
+[ext_resource type="Script" uid="uid://gvlc33nxy2ls" path="res://Entities/Scripts/game_mode_selector.gd" id="1_j3bn5"]
 
 [node name="GameModeSelector" type="Node"]
 script = ExtResource("1_j3bn5")

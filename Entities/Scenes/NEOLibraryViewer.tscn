@@ -23,7 +23,6 @@ layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_right = -1363.0
 grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("2_gf7s3")
@@ -34,25 +33,54 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_right = -1486.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_font_sizes/normal_font_size = 30
 
-[node name="Panel" type="Panel" parent="Control"]
-layout_mode = 0
-offset_top = 690.0
-offset_right = 313.0
-offset_bottom = 1072.0
+[node name="VBoxContainer" type="VBoxContainer" parent="Control"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -454.0
+offset_top = -256.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="next_button" type="Button" parent="Control/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "NEXT"
+
+[node name="previous_button" type="Button" parent="Control/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "PREVIOUS"
+
+[node name="pick_this_button" type="Button" parent="Control/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Pick This One!"
+
+[node name="back_button" type="Button" parent="Control/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "BACK"
 
 [node name="Container" type="Node3D" parent="."]
 unique_name_in_owner = true
 
 [node name="Camera3D" type="Camera3D" parent="Container"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6197884, 15.230764)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 7.81)
 
 [node name="OrbitControls" type="Node3D" parent="Container"]
 script = ExtResource("3_dj0ds")
 _camera = NodePath("../Camera3D")
+auto_rotate = true
+auto_rotate_speed = 0.3
 metadata/_custom_type_script = "uid://dobbjt5hiqqg4"
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="Container"]

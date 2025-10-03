@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://cyotjq21pkieh"]
+
+[ext_resource type="Script" uid="uid://dn0pm2bd2gu1f" path="res://MissionDesignPhase/impact_modeler.gd" id="1_5gmh0"]
+
+[node name="ImpactModeler" type="Node"]
+script = ExtResource("1_5gmh0")
+
+[node name="threeD_container" type="Node3D" parent="."]
+unique_name_in_owner = true

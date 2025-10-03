@@ -13,7 +13,9 @@ config_version=5
 config/name="Project Gaia"
 run/main_scene="uid://bk5eynu7vd4o4"
 config/features=PackedStringArray("4.5", "C#", "Forward Plus")
-config/icon="res://icon.svg"
+boot_splash/image="uid://dxr11lty1gsph"
+config/icon="uid://cbjsshjq3brlo"
+boot_splash/minimum_display_time=5000
 
 [autoload]
 
@@ -21,11 +23,13 @@ Console="*res://Entities/SandBox/Console.gd"
 ClassAnalyzer="*res://Entities/SandBox/ClassAnalyzer.gd"
 Globals="*res://Entities/SandBox/Globals.gd"
 SceneManager="*res://Entities/SandBox/SceneManager.gd"
+SoundManager="*res://Entities/SandBox/SoundManager.gd"
 
 [display]
 
 window/size/viewport_width=1920
 window/size/viewport_height=1080
+window/size/mode=4
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 

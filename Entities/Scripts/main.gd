@@ -31,7 +31,11 @@ func _ready():
 		continue_button.pressed.connect(on_continue_button_pressed)
 		settings_button.pressed.connect(on_settings_button_pressed)
 		quit_button.pressed.connect(on_quit_button_pressed)
-			
+		credit_button.pressed.connect(on_credit_button_pressed)
+		
+		#play the sound
+		SoundManager.play(SoundManager.sounds.TITLE,true,0.5,0.1)
+		
 				
 func on_new_game_button_pressed():
 	SceneManager.load_composition(SceneManager.Composition.GAME_MODE_SELECTION)
@@ -43,7 +47,16 @@ func on_settings_button_pressed():
 	pass
 
 func on_quit_button_pressed():
-	pass
+	print("Quiting game")
+	await get_tree().create_timer(1.0).timeout
+	get_tree().quit(0)
 		
-	
-	
+
+func on_credit_button_pressed():
+	SceneManager.add(SceneManager.Scene.CREDIT_SCENE)
+
+
+func _input(event):
+	if event is InputEventKey and event.is_pressed():
+		if event.keycode==KEY_ESCAPE and SceneManager.has(SceneManager.Scene.CREDIT_SCENE):
+			SceneManager.remove(SceneManager.Scene.CREDIT_SCENE)

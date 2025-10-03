@@ -1,0 +1,35 @@
+[gd_scene load_steps=3 format=3 uid="uid://vsmetahs06g2"]
+
+[ext_resource type="Theme" uid="uid://b3klx57slj0l3" path="res://UIUX/soft_retro.tres" id="1_6astq"]
+[ext_resource type="Script" uid="uid://da7skg78qgw4g" path="res://Entities/Scripts/credit_scene.gd" id="1_sc0d8"]
+
+[node name="CreditScene" type="Node"]
+script = ExtResource("1_sc0d8")
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_6astq")
+
+[node name="ColorRect" type="ColorRect" parent="Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.64705884)
+
+[node name="credit_label" type="RichTextLabel" parent="Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/normal_font_size = 165
+theme_override_font_sizes/bold_font_size = 330

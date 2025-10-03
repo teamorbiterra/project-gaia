@@ -127,25 +127,33 @@ func human_lines(d: Dictionary) -> Array[String]:
 	var diameter_km     := str(d.get("diameter_km"))
 	var albedo_text     := "—" if d.get("albedo") == null else str(d.get("albedo"))
 	var pha_text        := "Yes" if d.get("pha_flag") else "No"
+	lines.append("[color=cyan][b]Source Note[/b][/color]")
+	lines.append("[color=gray]Real data from NASA NeoWs (api.nasa.gov). Endpoint: /neo/browse[/color]")
+	lines.append("[color=gray]generated_utc: 2025-10-02T05:21:08Z[/color]\n")
 
-	lines.append("[b]NEO Summary[/b]")
-	lines.append("Designation:   %s" % designation)
-	lines.append("NEO Ref ID:    %s" % neo_ref_id)
+	lines.append("[color=cyan][b]NEO Summary[/b][/color]")
+	lines.append("[color=white]Designation:[/color]   [color=green]%s[/color]" % designation)
+	lines.append("[color=white]NEO Ref ID:[/color]    [color=green]%s[/color]" % neo_ref_id)
 	lines.append("")
-	lines.append("[b]Orbit (epoch TDB: %s)[/b]" % epoch_tdb)
-	lines.append("a:             %d km" % int(round(a_km)))
-	lines.append("e:             %s" % e)
-	lines.append("i:             %s°" % i_deg)
-	lines.append("RAAN:          %s°" % raan_deg)
-	lines.append("ω (arg peri):  %s°" % argp_deg)
-	lines.append("M (mean anom): %s°" % M_deg)
-	lines.append("")
-	lines.append("[b]Physical[/b]")
-	lines.append("H (mag):       %s" % H_mag)
-	lines.append("Diameter:      %s km" % diameter_km)
-	lines.append("Albedo pV:     %s" % albedo_text)
-	lines.append("PHA:           %s" % pha_text)
 
+	lines.append("[color=cyan][b]Orbit (epoch TDB: %s)[/b][/color]" % epoch_tdb)
+	lines.append("[color=white]a:[/color]             [color=orange]%d km[/color]" % int(round(a_km)))
+	lines.append("[color=white]e:[/color]             [color=orange]%s[/color]" % e)
+	lines.append("[color=white]i:[/color]             [color=orange]%s°[/color]" % i_deg)
+	lines.append("[color=white]RAAN:[/color]          [color=orange]%s°[/color]" % raan_deg)
+	lines.append("[color=white]ω (arg peri):[/color]  [color=orange]%s°[/color]" % argp_deg)
+	lines.append("[color=white]M (mean anom):[/color] [color=orange]%s°[/color]" % M_deg)
+	lines.append("")
+
+	lines.append("[color=cyan][b]Physical Information[/b][/color]")
+	lines.append("[color=white]H (mag):[/color]        [color=orange]%s[/color]" % H_mag)
+	lines.append("[color=white]Diameter:[/color]       [color=orange]%s km[/color]" % diameter_km)
+	lines.append("[color=white]Albedo pV:[/color]      [color=orange]%s[/color]" % albedo_text)
+	lines.append("[color=white]Potentially Hazardous:[/color] [color=red][b]%s[/b][/color]" % pha_text)
+	lines.append("")
+
+	lines.append("[color=red][b]Attention![/b][/color] [color=yellow]The NEO view is not physically accurate.[/color]")
+	lines.append("[color=gray]It is procedurally generated from noise, although the diameters are scaled according to the actual values.[/color]")
 	return lines
 
 
@@ -153,6 +161,11 @@ func human_lines(d: Dictionary) -> Array[String]:
 
 
 # ---- lifecycle ---------------------------------------------------------------
+@onready var next_button = %next_button
+@onready var previous_button = %previous_button
+@onready var pick_this_button = %pick_this_button
+@onready var back_button = %back_button
+
 
 func _ready() -> void:
 	if DESIGNATIONS is JSON and DESIGNATIONS.data is Array:
@@ -162,28 +175,37 @@ func _ready() -> void:
 	if not file_name_buffer.is_empty():
 		load_current_prefab()
 	
-	#prev_button.pressed.connect(
-		#func():
-		#if file_name_buffer.is_empty(): return
-		#current_file = max(0, current_file - 1)
-		#load_current_prefab()
-	#)
-	#next_buttnon.pressed.connect(
-		#func():
-		#if file_name_buffer.is_empty(): return
-		#current_file = min(file_name_buffer.size() - 1, current_file + 1)
-		#load_current_prefab()
-	#)
+	previous_button.pressed.connect(
+		func():
+		if file_name_buffer.is_empty(): return
+		current_file = max(0, current_file - 1)
+		load_current_prefab()
+	)
+	next_button.pressed.connect(
+		func():
+		if file_name_buffer.is_empty(): return
+		current_file = min(file_name_buffer.size() - 1, current_file + 1)
+		load_current_prefab()
+	)
+	pick_this_button.pressed.connect(
+		func():
+		Globals.active_neo_designation= file_name_buffer[current_file]
+		print("NEO Selected:",Globals.active_neo_designation)
+		print("Doing Further Works...")
+		SceneManager.load_composition(SceneManager.Composition.IMPACT_MODELING_COMPOSITION)		
+	)
+	back_button.pressed.connect(
+		func():
+		SceneManager.load_composition(SceneManager.Composition.GAME_MODE_SELECTION)
+		Globals.active_neo_designation=""
+	)
 	
-
-
-
+	
+	
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.is_pressed():
 		match event.keycode:
 			pass
-
-
 
 
 #region loading and clearing current prefab

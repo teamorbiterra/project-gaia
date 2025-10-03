@@ -9,7 +9,9 @@ enum Scene {
 	EARTH_ASTEROID_SYSTEM,
 	GAME_MODE_SELECTOR,
 	IDE_SCENE,
-	NEO_LIBRARY_VIEWER
+	NEO_LIBRARY_VIEWER,
+	IMPACT_MODELER,
+	CREDIT_SCENE
 }
 
 ## Composition enum - add your presets here
@@ -17,7 +19,8 @@ enum Composition {
 	MAIN_MENU,
 	GAME_MODE_SELECTION,
 	IDE_COMPOSITION,
-	NEO_LIBRARY_VIWER_COMPOSITION
+	NEO_LIBRARY_VIWER_COMPOSITION,
+	IMPACT_MODELING_COMPOSITION
 }
 
 ## Scene paths mapped to enum
@@ -26,7 +29,9 @@ const SCENE_PATHS = {
 	Scene.EARTH_ASTEROID_SYSTEM: "res://Entities/Scenes/EarthAesteroidSystem.tscn",
 	Scene.GAME_MODE_SELECTOR:"res://Entities/Scenes/Game Mode Selector.tscn" , 
 	Scene.IDE_SCENE:"res://Entities/SandBox/IDE/IDE.tscn",
-	Scene.NEO_LIBRARY_VIEWER: "res://Entities/Scenes/NEOLibraryViewer.tscn"
+	Scene.NEO_LIBRARY_VIEWER: "res://Entities/Scenes/NEOLibraryViewer.tscn",
+	Scene.IMPACT_MODELER: "res://MissionDesignPhase/ImpactModeler.tscn",
+	Scene.CREDIT_SCENE: "res://Entities/Scenes/CreditScene.tscn"
 }
 
 
@@ -36,7 +41,9 @@ const COMPOSITION_SCENES = {
 	Composition.MAIN_MENU: [Scene.MAIN, Scene.EARTH_ASTEROID_SYSTEM],
 	Composition.GAME_MODE_SELECTION: [Scene.EARTH_ASTEROID_SYSTEM, Scene.GAME_MODE_SELECTOR],
 	Composition.IDE_COMPOSITION:[Scene.IDE_SCENE],
-	Composition.NEO_LIBRARY_VIWER_COMPOSITION:[Scene.NEO_LIBRARY_VIEWER]
+	Composition.NEO_LIBRARY_VIWER_COMPOSITION:[Scene.NEO_LIBRARY_VIEWER],
+	Composition.IMPACT_MODELING_COMPOSITION:[Scene.IMPACT_MODELER] #TODO: add more items related to impact modeling 
+
 }
 
 ## Currently active scenes (key = Scene enum, value = instance)
