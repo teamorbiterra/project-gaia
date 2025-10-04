@@ -1,10 +1,11 @@
-[gd_scene load_steps=9 format=3 uid="uid://cyotjq21pkieh"]
+[gd_scene load_steps=10 format=3 uid="uid://cyotjq21pkieh"]
 
 [ext_resource type="Script" uid="uid://dn0pm2bd2gu1f" path="res://MissionDesignPhase/impact_modeler.gd" id="1_5gmh0"]
 [ext_resource type="Script" uid="uid://dobbjt5hiqqg4" path="res://addons/orbit-controls/orbit-controls.gd" id="2_4kt0p"]
 [ext_resource type="Texture2D" uid="uid://dui4qxbvw1ntd" path="res://HDRI Textures/HDR_blue_nebulae-1.hdr" id="2_jcbdn"]
 [ext_resource type="Script" uid="uid://bb4n6qjrt3eg7" path="res://MissionDesignPhase/impact_calculator.gd" id="4_88ael"]
 [ext_resource type="Script" uid="uid://df20e3vk8vsbe" path="res://MissionDesignPhase/drawing_canvas.gd" id="5_jp1qr"]
+[ext_resource type="Theme" uid="uid://b3klx57slj0l3" path="res://UIUX/soft_retro.tres" id="6_i6et0"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_88ael"]
 panorama = ExtResource("2_jcbdn")
@@ -50,3 +51,27 @@ size = Vector2i(700, 700)
 [node name="drawing_canvas" type="Node2D" parent="Window"]
 unique_name_in_owner = true
 script = ExtResource("5_jp1qr")
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 1476.0
+offset_top = 789.0
+offset_right = 1765.0
+offset_bottom = 1060.0
+theme = ExtResource("6_i6et0")
+
+[node name="goto_mission_design_button" type="Button" parent="Control"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_right = 8.0
+offset_bottom = 8.0
+text = "Goto Mission Design"
+
+[node name="get_back_button" type="Button" parent="Control"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_top = 75.0
+offset_right = 427.0
+offset_bottom = 136.0
+text = "Get Back"

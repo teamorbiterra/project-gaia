@@ -300,17 +300,17 @@ func draw_impact_zones(pos: Vector2):
 	draw_panel_background(pos, panel_size, "IMPACT ZONES")
 	
 	var center = pos + panel_size / 2 + Vector2(0, 20)
-	var zone_scale = 1.5  # Scale factor for visualization (renamed to avoid shadowing)
+	var scale = 1.5  # Scale factor for visualization
 	
 	# Define damage zones (draw from largest to smallest)
 	var zones = [
-		{"radius": assessment.moderate_damage_radius_km * zone_scale, 
+		{"radius": assessment.moderate_damage_radius_km * scale, 
 		 "color": Color(1, 0.8, 0, 0.3), "label": "Moderate", "km": assessment.moderate_damage_radius_km},
-		{"radius": assessment.severe_damage_radius_km * zone_scale, 
+		{"radius": assessment.severe_damage_radius_km * scale, 
 		 "color": Color(1, 0.4, 0, 0.4), "label": "Severe", "km": assessment.severe_damage_radius_km},
-		{"radius": assessment.total_destruction_radius_km * zone_scale, 
+		{"radius": assessment.total_destruction_radius_km * scale, 
 		 "color": Color(1, 0, 0, 0.5), "label": "Total", "km": assessment.total_destruction_radius_km},
-		{"radius": assessment.crater_diameter_km * zone_scale / 2, 
+		{"radius": assessment.crater_diameter_km * scale / 2, 
 		 "color": Color(0.3, 0.1, 0, 0.7), "label": "Crater", "km": assessment.crater_diameter_km}
 	]
 	
@@ -321,7 +321,7 @@ func draw_impact_zones(pos: Vector2):
 			draw_arc(center, zone.radius, 0, TAU, 32, Color.WHITE, 2, false)
 	
 	# Draw thermal radiation radius (dashed circle)
-	var thermal_radius = assessment.thermal_radiation_radius_km * zone_scale
+	var thermal_radius = assessment.thermal_radiation_radius_km * scale
 	if thermal_radius > 0:
 		draw_dashed_circle(center, thermal_radius, Color(1, 0.5, 0, 0.6))
 	
@@ -354,7 +354,7 @@ func draw_impact_zones(pos: Vector2):
 		draw_string(small_font, Vector2(legend_x + 25, y + 12), thermal_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(1, 0.5, 0))
 	
 	# Scale indicator
-	var scale_length = 50 * zone_scale
+	var scale_length = 50 * scale
 	var scale_pos = center + Vector2(-100, 150)
 	draw_line(scale_pos, scale_pos + Vector2(scale_length, 0), Color.WHITE, 3)
 	draw_line(scale_pos, scale_pos + Vector2(0, -10), Color.WHITE, 3)
@@ -390,7 +390,7 @@ func draw_orbital_data(pos: Vector2):
 	
 	# Draw data rows
 	for i in range(orbital_data.size()):
-		var _row = orbital_data[i]  # Prefix with underscore to indicate intentionally unused
+		var row = orbital_data[i]
 		
 		# Define box sizes
 		var label_size = Vector2(280, 25)
@@ -412,10 +412,10 @@ func draw_orbital_data(pos: Vector2):
 		
 		# Draw text labels
 		draw_string(small_font, data_start + Vector2(col1_x + 5, i * line_height + 17), 
-					orbital_data[i][0], HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(0.8, 0.8, 0.9))
+					row[0], HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(0.8, 0.8, 0.9))
 		
 		draw_string(small_font, data_start + Vector2(col2_x + 5, i * line_height + 17), 
-					orbital_data[i][1], HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(1, 1, 1)) 
+					row[1], HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(1, 1, 1))
 	for i in range(orbital_data.size()):
 		var row = orbital_data[i]
 		
@@ -455,7 +455,7 @@ func draw_casualties_chart(pos: Vector2):
 	
 	# Calculate casualty breakdown
 	var immediate = assessment.estimated_immediate_casualties
-	var _delayed = assessment.estimated_total_casualties - immediate  # Prefix with underscore
+	var delayed = assessment.estimated_total_casualties - immediate
 	var total = float(assessment.estimated_total_casualties)
 	
 	# Draw pie chart
