@@ -4,9 +4,12 @@ android/
 
 # File to ignore
 icon.png
+Data Processing Server/Externals/src/internals.py
 
 # Folders to ignore
 demo/
 Experiments/
 "NEO Tester"/
 skydemo/
+Data Processing Server/Externals/src/internals.py
+
